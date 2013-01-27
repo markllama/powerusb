@@ -19,12 +19,12 @@ PowerUSB: http://www.pwrusb.com
 
 Mailing Address:
 
-  PowerUSB
-  2901, Mill Haven Ct,
-  Plano TX 75093
+    PowerUSB
+    2901, Mill Haven Ct,
+    Plano TX 75093
 
-Voice: (214).504.2263
-Emai: info@pwrusb.com
+* Voice: (214).504.2263
+* Email: info@pwrusb.com
 
 THE AUTHOR HAS NO RELATIONSHIP WITH THE POWERUSB COMPANY.  THIS SOFTWARE
 IS NOT OFFERED BY THE COMPANY. THERE IS NO WARRENTY FOR USE.
