@@ -10,9 +10,11 @@ from optparse import OptionParser
 # work with XML DOM structures for configuration and automation
 import lxml.etree as etree
 
+# Use usb 0.4 until I can find the right way to split them
 try:
-    import usb.core
-    import usb.util
+    #import usb.core
+    #import usb.util
+    import usb.legacy as usb
 except ImportError:
     import usb
 
@@ -36,6 +38,9 @@ class PowerUSBStrip:
                          PowerUSBOutlet(self, 2),
                          PowerUSBOutlet(self, 3)]
 
+    def sockets(self):
+        return self._sockets
+
     @staticmethod
     def is_strip(device):
         return (device.idVendor == PowerUSBStrip.vendor_id and 
@@ -46,11 +51,16 @@ class PowerUSBStrip:
         """
         Scan the USB bus and collect all PowerUSB strips
         Each bus can have zero or more devices any of which may be a power strip.
+        Return the list of PowerUSB strips available
         """
-        
-        devices = [device for bus in usb.busses() for device in bus.devices]
-        
-        strips = [PowerUSBStrip(device) for device in devices if PowerUSBStrip.is_strip(device)]
+        busses = usb.busses()
+        strips = []
+        for ibus in range(len(busses)):
+            bus = busses[ibus]
+            for idev in range(len(bus.devices)):
+                dev = bus.devices[idev]
+                if PowerUSBStrip.is_strip(dev):
+                    strips.append(PowerUSBStrip(dev, ibus, idev))
 
         return strips
 
