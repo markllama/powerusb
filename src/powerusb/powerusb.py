@@ -97,4 +97,7 @@ if __name__ == "__main__":
     #dev = usb.core.find(idVendor=vendor_id, idProduct=product_id, find_all=True)
     #print dev
     strips = PowerUSBStrip.scanbus()
-    print strips[0].iSerialNumber()
+    print "There are %d power strips" % len(strips)
+    strip  = strips[0]
+    dh = strip._usbdevice.open()
+    print dh
