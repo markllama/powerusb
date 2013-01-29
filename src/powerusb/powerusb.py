@@ -67,14 +67,29 @@ class PowerUSBStrip:
     def iSerialNumber(self):
         return self._usbdevice.iSerialNumber
 
+    def reset():
+        """Reset the entire strip"""
+
 class PowerUSBOutlet:
+    """
+    A single outlet on a PowerUSB strip
+    """
 
     def __init__(self, strip, port):
         self._strip = strip
         self._port = port
 
-vendor_id = 0x04d8
-product_id = 0x003f
+    def on():
+        """Turn the outlet on"""
+
+    def off():
+        """Turn the outlet off"""
+
+    def default(state=None):
+        """get or set the default state"""
+
+    
+
 
 
 if __name__ == "__main__":
