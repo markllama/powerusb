@@ -36,7 +36,7 @@ class PowerUSBStrip:
                          PowerUSBOutlet(self, 3)]
 
     @staticmethod
-    def list_strips():
+    def strip_devices():
         """
         Search the udev list for power strip devices
         """
@@ -48,6 +48,14 @@ class PowerUSBStrip:
                   and d.attributes['idProduct'] == PowerUSBStrip.product_id]
         
         return strips
+
+    @staticmethod
+    def strips():
+        """
+        Return the set of strip objects
+        """
+        return [PowerUSBStrip(d) for d in PowerUSBStrip.strip_devices()]
+        
 
     def outlets(self):
         return self._outlets
