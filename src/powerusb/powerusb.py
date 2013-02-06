@@ -1,7 +1,7 @@
 #
 # Library to control PowerUSB power strips
 #
-import sys
+import sys, os
 
 
 # manage inputs
@@ -16,24 +16,76 @@ class PowerUSBStrip:
     """
     Model a PowerUSB switchable power strip.
     """
-    vendor_id = "04d8"
-    product_id = "003f"
+    _vendor_id = "04d8"
+    _product_id = "003f"
 
-    buffer_len = 256
-    buffer_write = 65
-    
-    def __init__(self, usbdevice, busnum=None, devnum=None):
+    _buffer_len = 256
+    _buffer_write = 65
+
+    # strip commands
+    _READ_FIRMWARE_VERSION = chr(0xa7)
+    _READ_MODEL            = chr(0xaa)
+
+    _READ_CURRENT          = chr(0xb1)
+    _READ_CURRENT_CUM      = chr(0xb2)
+    _RESET_CURRENT_COUNT   = chr(0xb3)
+    _WRITE_OVERLOAD        = chr(0xb4)
+    _READ_OVERLOAD         = chr(0xb5)
+    _SET_CURRENT_RATIO     = chr(0xb6)
+    _RESET_BOARD           = chr(0xc1)
+    _SET_CURRENT_OFFSET    = chr(0xc2)
+
+    _ALL_PORT_ON           = chr(0xa5)
+    _ALL_PORT_OFF          = chr(0xa6)
+    _SET_MODE              = chr(0xa8)
+    _READ_MODE             = chr(0xa9)
+
+    def __init__(self, device):
         """
         busnum: Integer - index of this bus
         devnum: Integer - index of this device on the bus
         """
-        self._usbdevice = usbdevice
-        self._busnum = busnum
-        self._devnum = devnum
+        self._device = device
+        self._file = None
+        self._fd = None
+        self._model = None
 
         self._outlets = [PowerUSBOutlet(self, 1),
                          PowerUSBOutlet(self, 2),
                          PowerUSBOutlet(self, 3)]
+
+    def open(self):
+        """Open the strip device file"""
+        self._fd = os.open(self._device.device_node, os.O_RDWR | os.O_NONBLOCK)
+        #self._file = open(self._device.device_node, 'rw')
+
+    def close(self):
+        """Close the strip device file"""
+        #self._file.close()
+        os.close(self._fd)
+
+    def write(self, command):
+        """Write a command to the power strip"""
+        # the output buffer is 256 char, but the output is 65 bytes
+        # the first byte is always a 0x00 and the trailing bytes are always
+        # 0xff.
+        # The remaining bytes in the middle are the message
+        outbuf = chr(0x00) + command + (chr(0xff) * (64 - len(command)))
+        #self._file.write(outbuf)
+        os.write(self._fd, outbuf)
+
+    def read(self):
+        """Read from the power strip"""
+        #return self._file.read(self._buffer_write)
+        return os.read(self._fd, self._buffer_write)
+
+    def model(self):
+        """Retrieve the power strip model """
+        if self._model == None:
+            command = "\0" + PowerUSBStrip._READ_MODEL
+            self.write(command)
+            self._model = self.read()
+        return self._model
 
     @staticmethod
     def strip_devices():
@@ -41,11 +93,11 @@ class PowerUSBStrip:
         Search the udev list for power strip devices
         """
         context = pyudev.Context()
-        usb_devices = context.list_devices(subsystem="usb")
-        strips = [d for d in usb_devices 
+        devices = context.list_devices(subsystem="usb")
+        strips = [d for d in devices 
                   if 'idVendor' in d.attributes.keys()
-                  and d.attributes['idVendor'] == PowerUSBStrip.vendor_id
-                  and d.attributes['idProduct'] == PowerUSBStrip.product_id]
+                  and d.attributes['idVendor'] == PowerUSBStrip._vendor_id
+                  and d.attributes['idProduct'] == PowerUSBStrip._product_id]
         
         return strips
 
@@ -60,59 +112,50 @@ class PowerUSBStrip:
     def outlets(self):
         return self._outlets
 
-    @staticmethod
-    def get_interface():
-        return Interface(vendor_id = PowerUSBStrip.vendor_id, 
-                         product_id = PowerUSBStrip.product_id)
+        
 
-    def iSerialNumber(self):
-        return self._usbdevice.iSerialNumber
-
-    def reset():
+    def reset(self):
         """Reset the entire strip"""
         pass
 
-    def firmware_verson():
+    def firmware_verson(self):
         """Read the power strip firmware version"""
         pass
 
-    def model():
-        """Read the power strip model"""
-        pass
-
-    def current():
+    def current(self):
         """Read the instantanious current from the whole strip"""
         pass
 
-    def current_cumultive():
+    def current_cumultive(self):
         """Read the cumulative current from the whole strip"""
         pass
 
-    def reset_current_counter():
+    def reset_current_counter(self):
         """Reset the current counter"""
         pass
 
-    def all_on():
+    def all_on(self):
         pass
 
-    def all_off():
+    def all_off(self):
         pass
 
-    def mode(value=None):
+    def mode(self, value=None):
         """Set or get the 'mode'"""
         pass
 
+    
 
 class PowerUSBOutlet:
     """
     A single outlet on a PowerUSB strip
     """
-    _on_code = ['A', 'C', 'E']
-    _off_code = ['B', 'D', 'P']
-    _defon_code = ['N', 'G', 'O']
-    _defoff_code = ['F', 'Q', 'H']
-    _read = [0xa1, 0xa2, 0xac]
-    _read_pwrup = [0xa3, 0xa4, 0xad]
+    _ON_CODE      = ['A', 'C', 'E']
+    _OFF_CODE     = ['B', 'D', 'P']
+    _DEF_ON_CODE  = ['N', 'G', 'O']
+    _DEF_OFF_CODE = ['F', 'Q', 'H']
+    _READ         = [0xa1, 0xa2, 0xac]
+    _READ_PWRUP   = [0xa3, 0xa4, 0xad]
 
     def __init__(self, strip, port):
         self._strip = strip
