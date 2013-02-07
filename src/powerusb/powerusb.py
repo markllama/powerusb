@@ -1,7 +1,7 @@
 #
 # Library to control PowerUSB power strips
 #
-import sys, os
+import sys, os, time
 
 
 # manage inputs
@@ -11,13 +11,16 @@ from optparse import OptionParser
 import lxml.etree as etree
 
 import pyudev
+import usb
 
 class PowerUSBStrip:
     """
     Model a PowerUSB switchable power strip.
     """
-    _vendor_id = "04d8"
-    _product_id = "003f"
+    _vendor_id = 0x04d8
+    _vendor_id_str = "04d8"
+    _product_id = 0x003f
+    _product_id_str = "003f"
 
     _buffer_len = 256
     _buffer_write = 65
@@ -56,8 +59,10 @@ class PowerUSBStrip:
 
     def open(self):
         """Open the strip device file"""
-        self._fd = os.open(self._device.device_node, os.O_RDWR | os.O_NONBLOCK)
-        #self._file = open(self._device.device_node, 'rw')
+        self._dh = self._device.open()
+        self._dh.claimInterface(0)
+        #self._fd = os.open(self._device.device_node, os.O_RDWR | os.O_APPEND | os.O_NONBLOCK)
+        #self._file = open(self._device.device_node, 'r+')
 
     def close(self):
         """Close the strip device file"""
@@ -72,23 +77,26 @@ class PowerUSBStrip:
         # The remaining bytes in the middle are the message
         outbuf = chr(0x00) + command + (chr(0xff) * (64 - len(command)))
         #self._file.write(outbuf)
-        os.write(self._fd, outbuf)
+        #os.write(self._fd, outbuf)
+        self._dh.bulkWrite(1, outbuf)
 
     def read(self):
         """Read from the power strip"""
-        #return self._file.read(self._buffer_write)
-        return os.read(self._fd, self._buffer_write)
+        #return self._file.read(65)
+        #return os.read(self._fd, self._buffer_write)
+        return self._dh.bulkRead(1, 64)
 
     def model(self):
         """Retrieve the power strip model """
         if self._model == None:
-            command = "\0" + PowerUSBStrip._READ_MODEL
+            command = PowerUSBStrip._READ_MODEL
             self.write(command)
-            self._model = self.read()
+            outstring = self.read()
+            self._model = int(outstring[0])
         return self._model
 
     @staticmethod
-    def strip_devices():
+    def strip_devices_udev():
         """
         Search the udev list for power strip devices
         """
@@ -96,10 +104,15 @@ class PowerUSBStrip:
         devices = context.list_devices(subsystem="usb")
         strips = [d for d in devices 
                   if 'idVendor' in d.attributes.keys()
-                  and d.attributes['idVendor'] == PowerUSBStrip._vendor_id
-                  and d.attributes['idProduct'] == PowerUSBStrip._product_id]
+                  and d.attributes['idVendor'] == str(PowerUSBStrip._vendor_id_str)
+                  and d.attributes['idProduct'] == PowerUSBStrip._product_id_str]
         
         return strips
+
+
+    @staticmethod
+    def strip_devices():
+        return [d for d in usb.busses()[0].devices if d.idVendor == 0x04d8]
 
     @staticmethod
     def strips():
@@ -107,7 +120,6 @@ class PowerUSBStrip:
         Return the set of strip objects
         """
         return [PowerUSBStrip(d) for d in PowerUSBStrip.strip_devices()]
-        
 
     def outlets(self):
         return self._outlets
