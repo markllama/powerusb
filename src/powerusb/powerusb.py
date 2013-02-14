@@ -60,6 +60,7 @@ class PowerUSBStrip:
     def open(self):
         """Open the strip device file"""
         self._dh = self._device.open()
+        self._dh.setConfiguration(1)
         self._dh.claimInterface(0)
         #self._fd = os.open(self._device.device_node, os.O_RDWR | os.O_APPEND | os.O_NONBLOCK)
         #self._file = open(self._device.device_node, 'r+')
@@ -67,7 +68,8 @@ class PowerUSBStrip:
     def close(self):
         """Close the strip device file"""
         #self._file.close()
-        os.close(self._fd)
+        #os.close(self._fd)
+        self._dh.releaseInterface()
 
     def write(self, command):
         """Write a command to the power strip"""
