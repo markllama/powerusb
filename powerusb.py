@@ -24,7 +24,7 @@ powerusb --meter <strip> [--cumulative|--reset]]
 
 import argparse
 import re
-import usb
+import usb, pyudev
 
 ##############################################################################
 #
@@ -76,7 +76,7 @@ def parse_command_line():
 #
 ###############################################################################
 
-class PowerUSBStrip():
+class PowerUSBStrip(object):
     """
     A PowerUSB switched power strip
     """
@@ -86,6 +86,15 @@ class PowerUSBStrip():
 
     def __init__(self, usb_device):
         self.usb_device = usb_device
+        self.usb_dh = self.usb_device.open()
+        
+    @property
+    def manufacturer(self):
+        return self.usb_dh.getString(self.usb_device.iManufacturer, 256)
+    
+    @property
+    def product(self):
+        return self.usb_dh.getString(self.usb_device.iProduct, 256)
 
     @staticmethod
     def strips():
@@ -97,6 +106,26 @@ class PowerUSBStrip():
                 and d.idProduct == PowerUSBStrip._product_id]
 
 
+class PowerUSBStrip2(object):
+
+    _vendor_id = "04d8"
+    _product_id = "003f"
+    
+    def __init__(self, udev_device):
+        self.udev_device = udev_device
+
+    @staticmethod
+    def strips():
+        """
+        Return the set of connected power strips
+        """
+        context = pyudev.Context()
+        usb_devices = context.list_devices(
+            ID_VENDOR_ID=PowerUSBStrip2._vendor_id,
+            ID_PRODUCT_ID=PowerUSBStrip2._product_id
+            )
+        return [PowerUSBStrip2(d) for d in usb_devices]
+        
 ###############################################################################
 #
 # PowerUSB Commands
@@ -104,7 +133,9 @@ class PowerUSBStrip():
 ###############################################################################
 
 def strips():
-    print PowerUSBStrip.strips()
+    for strip in PowerUSBStrip2.strips():
+        
+        print strip
 
 ###############################################################################
 #
