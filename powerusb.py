@@ -137,7 +137,7 @@ class PowerUSBStrip2(object):
 def strips():
     for strip in PowerUSBStrip2.strips():
         
-        print strip
+        print strip.udev_device
 
 ###############################################################################
 #
