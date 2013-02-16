@@ -47,6 +47,9 @@ def parse_command_line():
     parser.add_argument("--verbose", "-v", action="store_true")
     parser.add_argument("--xml", "-x", action="store_true")
     parser.add_argument("--json", "-j", action="store_true")
+    method_group = parser.add_mutually_exclusive_group()
+    method_group.add_argument("--udev", action="store_true")
+    method_group.add_argument("--usb", dest="udev", action="store_false")
     cmd_group = parser.add_mutually_exclusive_group()
     cmd_group.add_argument("--strips", "-l", action="store_true")
     cmd_group.add_argument("--status", '-s', metavar="SOCKETSPEC", 
@@ -125,7 +128,6 @@ class PowerUSBStrip2(object):
             subsystem="usb",
             PRODUCT=PowerUSBStrip2._product
             )
-        print usb_devices
         return [PowerUSBStrip2(d) for d in usb_devices]
         
 ###############################################################################
@@ -134,10 +136,10 @@ class PowerUSBStrip2(object):
 #
 ###############################################################################
 
-def strips():
-    for strip in PowerUSBStrip2.strips():
+def strips(strip_class):
+    for strip in strip_class.strips():
         
-        print strip.udev_device
+        print strip
 
 ###############################################################################
 #
@@ -148,7 +150,9 @@ if __name__ == "__main__":
 
     opts = parse_command_line()
 
-    if opts.strips:
-        strips()
+    if opts.udev:
+        print PowerUSBStrip2.strips()
+    else:
+        print PowerUSBStrip.strips()
 
     print opts
