@@ -1,1 +1,1 @@
-SUBSYSTEM="usb", ATTRS{idVendor}="04d8", ATTRS{idProduct}="003f", OWNER="mark", GROUP="mark", MODE="0666" SYMLINK="powerusb%n" RUN="/bin/sh -c 'echo -n $id:1.0 > /sys/bus/usb/drivers/usbhid/unbind'"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="003f", OWNER="mark", GROUP="mark", MODE="0666" SYMLINK="powerusb%n" RUN="/bin/sh -c 'echo -n $id:1.0 > /sys/bus/usb/drivers/usbhid/unbind'"
