@@ -110,6 +110,7 @@ class PowerUSBStrip2(object):
 
     _vendor_id = "04d8"
     _product_id = "003f"
+    _product = u'4d8/3f/2'
     
     def __init__(self, udev_device):
         self.udev_device = udev_device
@@ -121,9 +122,10 @@ class PowerUSBStrip2(object):
         """
         context = pyudev.Context()
         usb_devices = context.list_devices(
-            ID_VENDOR_ID=PowerUSBStrip2._vendor_id,
-            ID_PRODUCT_ID=PowerUSBStrip2._product_id
+            subsystem="usb",
+            PRODUCT=PowerUSBStrip2._product
             )
+        print usb_devices
         return [PowerUSBStrip2(d) for d in usb_devices]
         
 ###############################################################################
