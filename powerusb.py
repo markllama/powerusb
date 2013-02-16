@@ -90,6 +90,10 @@ class PowerUSBStrip(object):
     def __init__(self, usb_device):
         self.usb_device = usb_device
         self.usb_dh = self.usb_device.open()
+
+    @property
+    def device(self):
+        return self.usb_dh
         
     @property
     def manufacturer(self):
@@ -118,6 +122,10 @@ class PowerUSBStrip2(object):
     def __init__(self, udev_device):
         self.udev_device = udev_device
 
+    @property
+    def device(self):
+        return self.udev_device
+
     @staticmethod
     def strips():
         """
@@ -139,7 +147,7 @@ class PowerUSBStrip2(object):
 def strips(strip_class):
     for strip in strip_class.strips():
         
-        print strip
+        print strip._
 
 ###############################################################################
 #
@@ -151,8 +159,10 @@ if __name__ == "__main__":
     opts = parse_command_line()
 
     if opts.udev:
-        print PowerUSBStrip2.strips()
+        for strip in PowerUSBStrip2.strips():
+            print strip.device.keys()
     else:
-        print PowerUSBStrip.strips()
+        for strip in PowerUSBStrip.strips():
+            print strip.device.keys()
 
     print opts
