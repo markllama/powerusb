@@ -134,7 +134,8 @@ class PowerUSBStrip2(object):
         context = pyudev.Context()
         usb_devices = context.list_devices(
             subsystem="usb",
-            PRODUCT=PowerUSBStrip2._product
+            ID_VENDOR_ID=PowerUSBStrip2._vendor_id,
+            ID_PRODUCT_ID=PowerUSBStrip2._product_id
             )
         return [PowerUSBStrip2(d) for d in usb_devices]
         
@@ -146,8 +147,8 @@ class PowerUSBStrip2(object):
 
 def strips(strip_class):
     for strip in strip_class.strips():
-        
-        print strip._
+        pass
+
 
 ###############################################################################
 #
@@ -160,9 +161,13 @@ if __name__ == "__main__":
 
     if opts.udev:
         for strip in PowerUSBStrip2.strips():
-            print strip.device.keys()
+            print strip.device.device_path
+            print strip.device.subsystem
+            for a in strip.device.attributes:
+                print a
+            print strip.device.attributes['idVendor']
     else:
         for strip in PowerUSBStrip.strips():
-            print strip.device.keys()
+            print strip.device.dev.bus
 
     print opts
