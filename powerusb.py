@@ -47,9 +47,6 @@ def parse_command_line():
     parser.add_argument("--verbose", "-v", action="store_true")
     parser.add_argument("--xml", "-x", action="store_true")
     parser.add_argument("--json", "-j", action="store_true")
-    method_group = parser.add_mutually_exclusive_group()
-    method_group.add_argument("--udev", action="store_true")
-    method_group.add_argument("--usb", dest="udev", action="store_false")
     cmd_group = parser.add_mutually_exclusive_group()
     cmd_group.add_argument("--strips", "-l", action="store_true")
     cmd_group.add_argument("--status", '-s', metavar="SOCKETSPEC", 
@@ -80,40 +77,6 @@ def parse_command_line():
 ###############################################################################
 
 class PowerUSBStrip(object):
-    """
-    A PowerUSB switched power strip
-    """
-
-    _vendor_id = 0x04d8
-    _product_id = 0x003f
-
-    def __init__(self, usb_device):
-        self.usb_device = usb_device
-        self.usb_dh = self.usb_device.open()
-
-    @property
-    def device(self):
-        return self.usb_dh
-        
-    @property
-    def manufacturer(self):
-        return self.usb_dh.getString(self.usb_device.iManufacturer, 256)
-    
-    @property
-    def product(self):
-        return self.usb_dh.getString(self.usb_device.iProduct, 256)
-
-    @staticmethod
-    def strips():
-        """
-        Return the set of connected power strips
-        """
-        return [PowerUSBStrip(d) for b in usb.busses() for d in b.devices
-                if d.idVendor == PowerUSBStrip._vendor_id 
-                and d.idProduct == PowerUSBStrip._product_id]
-
-
-class PowerUSBStrip2(object):
 
     _vendor_id = "04d8"
     _product_id = "003f"
@@ -125,14 +88,6 @@ class PowerUSBStrip2(object):
     @property
     def device(self):
         return self.udev_device
-
-    @property
-    def manufacturer(self):
-        return self.udev_device.attributes['manufacturer']
-    
-    @property
-    def product(self):
-        return self.udev_device.attributes['product']
     
     def open(self):
         print("opening file %s" % self.udev_device.device_node)
@@ -143,6 +98,22 @@ class PowerUSBStrip2(object):
         self.fd.close()
         self.fd = None
 
+    def read(self):
+        instr = self.fd.read()
+        return instr
+
+    def write(self, outstr):
+        self.fd.write(outstr)
+
+    
+    @property
+    def manufacturer(self):
+        return self.udev_device.attributes['manufacturer']
+    
+    @property
+    def product(self):
+        return self.udev_device.attributes['product']
+
     @staticmethod
     def strips():
         """
@@ -150,9 +121,9 @@ class PowerUSBStrip2(object):
         """
         context = pyudev.Context()
         usb_devices = context.list_devices(
-            subsystem="usb", PRODUCT=PowerUSBStrip2._product
+            subsystem="usb", PRODUCT=PowerUSBStrip._product
             )
-        return [PowerUSBStrip2(d) for d in usb_devices if "idVendor" in d.attributes]
+        return [PowerUSBStrip(d) for d in usb_devices if "idVendor" in d.attributes]
         
 ###############################################################################
 #
@@ -174,16 +145,12 @@ if __name__ == "__main__":
 
     opts = parse_command_line()
 
-    if opts.udev:
-        for strip in PowerUSBStrip2.strips():
-            print strip.device.device_path
-            print strip.device.subsystem
-            print strip.manufacturer
-            strip.open()
-            print strip.fd
-            strip.close()
-    else:
-        for strip in PowerUSBStrip.strips():
-            print strip.device.dev.bus
+    for strip in PowerUSBStrip.strips():
+        print strip.device.device_path
+        print strip.device.subsystem
+        print strip.manufacturer
+        strip.open()
+        print strip.fd
+        strip.close()
 
     print opts
