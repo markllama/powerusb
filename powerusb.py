@@ -133,11 +133,9 @@ class PowerUSBStrip2(object):
         """
         context = pyudev.Context()
         usb_devices = context.list_devices(
-            subsystem="usb",
-            ID_VENDOR_ID=PowerUSBStrip2._vendor_id,
-            ID_PRODUCT_ID=PowerUSBStrip2._product_id
+            subsystem="usb", PRODUCT=PowerUSBStrip2._product
             )
-        return [PowerUSBStrip2(d) for d in usb_devices]
+        return [PowerUSBStrip2(d) for d in usb_devices if "idVendor" in d.attributes]
         
 ###############################################################################
 #
