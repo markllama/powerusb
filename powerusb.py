@@ -126,6 +126,23 @@ class PowerUSBStrip2(object):
     def device(self):
         return self.udev_device
 
+    @property
+    def manufacturer(self):
+        return self.udev_device.attributes['manufacturer']
+    
+    @property
+    def product(self):
+        return self.udev_device.attributes['product']
+    
+    def open(self):
+        print("opening file %s" % self.udev_device.device_node)
+        self.fd = open(self.udev_device.device_node)
+        return self.fd
+
+    def close(self):
+        self.fd.close()
+        self.fd = None
+
     @staticmethod
     def strips():
         """
@@ -161,9 +178,10 @@ if __name__ == "__main__":
         for strip in PowerUSBStrip2.strips():
             print strip.device.device_path
             print strip.device.subsystem
-            for a in strip.device.attributes:
-                print a
-            print strip.device.attributes['idVendor']
+            print strip.manufacturer
+            strip.open()
+            print strip.fd
+            strip.close()
     else:
         for strip in PowerUSBStrip.strips():
             print strip.device.dev.bus
