@@ -84,17 +84,21 @@ class PowerUSBStrip(object):
     
     def __init__(self, udev_device):
         self.udev_device = udev_device
+        self.sockets = []
+        for socket_num in range(1,4):
+            self.sockets.append(PowerUSBSocket(self, socket_num))
 
     @property
     def device(self):
         return self.udev_device
     
     def open(self):
-        print("opening file %s" % self.udev_device.device_node)
-        self.fd = open(self.udev_device.device_node)
+        print("opening file %s" % self.udev_device.device_links)
+        self.fd = open(self.udev_device.device_node, 'rw+')
         return self.fd
 
     def close(self):
+        print self.fd
         self.fd.close()
         self.fd = None
 
@@ -103,7 +107,7 @@ class PowerUSBStrip(object):
         return instr
 
     def write(self, outstr):
-        self.fd.write(outstr)
+        self.fd.write(outstr + chr(0xff) * (64 - len(outstr)))
 
     
     @property
@@ -124,6 +128,29 @@ class PowerUSBStrip(object):
             subsystem="usb", PRODUCT=PowerUSBStrip._product
             )
         return [PowerUSBStrip(d) for d in usb_devices if "idVendor" in d.attributes]
+        
+
+class PowerUSBSocket(object):
+
+    _on_cmd = ['A', 'C', 'E']
+    _off_cmd = ['B', 'D', 'P']
+    
+    _defon_cmd = ['N', 'G', 'O']
+    _defoff_cmd = ['F', 'Q', "H"]
+    
+    _state_cmd = [chr(0xa1), chr(0xa2), chr(0xac)]
+    _defstate_cmd = [chr(0xa3), chr(0xa4), chr(0xad)]
+
+    def __init__(self, strip, socket_num):
+        self._strip = strip
+        self._socket_num = socket_num
+
+    def on(self):
+        self._strip.write(PowerUSBSocket._on_cmd[self._socket_num - 1])
+
+    def off(self):
+        self._strip.write(PowerUSBSocket._off_cmd[self._socket_num - 1])
+
         
 ###############################################################################
 #
@@ -151,6 +178,7 @@ if __name__ == "__main__":
         print strip.manufacturer
         strip.open()
         print strip.fd
+        #strip.sockets[0].on()
         strip.close()
 
     print opts
