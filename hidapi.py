@@ -38,8 +38,6 @@ USB_RECIP_OTHER	=		0x03
 USB_ENDPOINT_IN	= 0x80
 USB_ENDPOINT_OUT = 0x00
 
-
-
 def hid_enumerate(vendor_id, product_id):
 
     # Find matching devices FIRST
@@ -47,7 +45,17 @@ def hid_enumerate(vendor_id, product_id):
                    if d.deviceClass == USB_CLASS_PER_INTERFACE
                    and d.idVendor == vendor_id and d.idProduct == product_id]
 
-    return [HIDDevice(d) for d in usb_devices]
+    
+    hid_devices = []
+    for d in usb_devices:
+        for c in d.configurations:
+            for ilist in c.interfaces:
+                for interface in ilist:
+                    if interface.interfaceClass == USB_CLASS_HID:
+                        hid_devices.append(d)
+
+    return [HIDDevice(d) for d in hid_devices]
+            
 
 class HIDDevice():
 
@@ -55,11 +63,20 @@ class HIDDevice():
         self.usb_device = usb_device
         self.dh = None
         self.blocking = True
+        
+    @property
+    def configuration(self):
+        return self.usb_device.configurations[0]
 
     @property
     def interface(self):
         """Find the HID interface"""
-        return self.usb_device.configurations[0].interfaces[0][0]
+        
+        for ilist in self.configuration.interfaces:
+            for interface in ilist:
+                if interface.interfaceClass == USB_CLASS_HID:
+                    return interface
+        return None
 
     @property
     def input_endpoint(self):
