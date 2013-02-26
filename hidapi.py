@@ -101,24 +101,17 @@ class HIDDevice():
         self.dh = self.usb_device.open()
         self.dh.claimInterface(0)
 
-    def write(self, buffer):
-        
-        if self.output_endpoint <= 0:
-            res = self.dh.controlMsg(
-                USB_TYPE_CLASS|USB_RECIP_INTERFACE|USB_ENDPOINT_OUT,
-                USB_REQ_SET_CONFIGURATION, 
-                buffer, 
-                value, 
-                0, 
-                1000
-                )
+    def close(self):
+        self.dh.releaseInterface()
 
-        else:
-            pass
- 
+    def write(self, buffer):
+        """Write to the interrupt output endpoint"""
+        self.dh.interruptWrite(
+            self.output_endpoint.address, 
+            buffer + chr(0xff) * (64 - len(buffer)))
 
     def read(self, size):
-        pass
+        return self.dh.interruptRead(self.input_endpoint.address, 64)
 
     @staticmethod
     def devices(vendor_id=None, product_id=None):
