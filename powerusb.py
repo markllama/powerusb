@@ -89,33 +89,32 @@ class PowerUSBStrip(object):
 
     @property
     def device(self):
-        return self.udev_device
+        return self.hid_device
     
     def open(self):
-        print("opening file %s" % self.udev_device.device_links)
-        self.fd = open(self.udev_device.device_node, 'rw+')
-        return self.fd
+        self.dh = self.hid_device.open()
+        return self.dh
 
     def close(self):
-        print self.fd
-        self.fd.close()
-        self.fd = None
+        print self.dh
+        self.dh.close()
+        self.dh = None
 
     def read(self):
-        instr = self.fd.read()
+        instr = self.dh.read()
         return instr
 
     def write(self, outstr):
-        self.fd.write(outstr + chr(0xff) * (64 - len(outstr)))
+        self.dh.write(outstr + chr(0xff) * (64 - len(outstr)))
 
     
     @property
     def manufacturer(self):
-        return self.udev_device.attributes['manufacturer']
+        return self.dh['manufacturer']
     
     @property
     def product(self):
-        return self.udev_device.attributes['product']
+        return self.dh['product']
 
     @staticmethod
     def strips():
