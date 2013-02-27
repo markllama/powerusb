@@ -171,11 +171,11 @@ if __name__ == "__main__":
     opts = parse_command_line()
 
     for strip in PowerUSBStrip.strips():
-        print strip.device.device_path
-        print strip.device.subsystem
-        print strip.manufacturer
+        #print strip.device.device_path
+        #print strip.device.subsystem
+        #print strip.manufacturer
         strip.open()
-        print strip.fd
+        print strip.dh
         #strip.sockets[0].on()
         strip.close()
 
