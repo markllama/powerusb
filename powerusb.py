@@ -24,7 +24,7 @@ powerusb --meter <strip> [--cumulative|--reset]]
 
 import argparse
 import re
-import usb, pyudev
+import hidapi
 
 ##############################################################################
 #
@@ -78,12 +78,11 @@ def parse_command_line():
 
 class PowerUSBStrip(object):
 
-    _vendor_id = "04d8"
-    _product_id = "003f"
-    _product = u'4d8/3f/2'
+    _vendor_id = 0x04d8
+    _product_id = 0x003f
     
-    def __init__(self, udev_device):
-        self.udev_device = udev_device
+    def __init__(self, hid_device):
+        self.hid_device = hid_device
         self.sockets = []
         for socket_num in range(1,4):
             self.sockets.append(PowerUSBSocket(self, socket_num))
@@ -123,11 +122,11 @@ class PowerUSBStrip(object):
         """
         Return the set of connected power strips
         """
-        context = pyudev.Context()
-        usb_devices = context.list_devices(
-            subsystem="usb", PRODUCT=PowerUSBStrip._product
+        hid_devices = hidapi.hid_enumerate(
+            PowerUSBStrip._vendor_id,
+            PowerUSBStrip._product_id
             )
-        return [PowerUSBStrip(d) for d in usb_devices if "idVendor" in d.attributes]
+        return [PowerUSBStrip(d) for d in hid_devices]
         
 
 class PowerUSBSocket(object):
