@@ -24,6 +24,7 @@ powerusb --meter <strip> [--cumulative|--reset]]
 
 import argparse
 import re
+import time
 import hidapi
 
 ##############################################################################
@@ -80,6 +81,53 @@ class PowerUSBStrip(object):
 
     _vendor_id = 0x04d8
     _product_id = 0x003f
+
+    _READ_FIRMWARE_VER	 = chr(0xa7)
+    _READ_MODEL		 = chr(0xaa)
+
+    _READ_CURRENT	 = chr(0xb1)
+    _READ_CURRENT_CUM	 = chr(0xb2)
+    _RESET_CURRENT_COUNT = chr(0xb3)
+    _WRITE_OVERLOAD      = chr(0xb4)
+    _READ_OVERLOAD	 = chr(0xb5)
+    _SET_CURRENT_RATIO	 = chr(0xb6)
+    _RESET_BOARD	 = chr(0xc1)
+    _SET_CURRENT_OFFSET	 = chr(0xc2)
+
+    _ALL_PORT_ON	 = chr(0xa5)
+    _ALL_PORT_OFF	 = chr(0xa6)
+    _SET_MODE		 = chr(0xa8)
+    _READ_MODE           = chr(0xa9)
+
+    # Digital IO
+    _SET_IO_DIRECTION	 = chr(0xd1)
+    _SET_IO_OUTPUT	 = chr(0xd3)
+    _GET_IO_INPUT	 = chr(0xd4)
+    _SET_IO_CLOCK        = chr(0xd5)
+    _GET_IO_OUTPUT	 = chr(0xd6)
+    _SET_IO_TRIGGER	 = chr(0xd7)
+    _SET_IO_SETPLC	 = chr(0xd8)
+    _SET_IO_GETPLC	 = chr(0xd9)
+    _SET_IO_CLRPLC	 = chr(0xda)
+
+    # Watchdog
+    _START_WDT		 = chr(0x90)
+    _STOP_WDT		 = chr(0x91)
+    _POWER_CYCLE	 = chr(0x92)
+    _READ_WDT 		 = chr(0x93)	# retrun the all status.
+    _HEART_BEAT		 = chr(0x94)
+    _SHUTDOWN_OFFON	 = chr(0x95)
+
+    # SMART
+    _SET_ONOFF		 = chr(0x81)
+    _GET_ONOFF		 = chr(0x82)
+    _SET_FREQ		 = chr(0x83)
+    _SET_ONOFFMODE	 = chr(0x84)
+    _SET_MODE_SMART	 = chr(0x85)
+    _SET_TVLIMIT	 = chr(0x86)
+    _SET_DATETIME	 = chr(0x87)
+    _DISP_TEXT		 = chr(0x88)
+    _SET_PASS		 = chr(0x89)
     
     def __init__(self, hid_device):
         self.hid_device = hid_device
@@ -90,31 +138,49 @@ class PowerUSBStrip(object):
     @property
     def device(self):
         return self.hid_device
-    
+
     def open(self):
-        self.dh = self.hid_device.open()
-        return self.dh
+        self.hid_device.open()
 
     def close(self):
-        print self.dh
-        self.dh.close()
-        self.dh = None
+        self.hid_device.close()
 
     def read(self):
-        instr = self.dh.read()
+        instr = self.hid_device.read(64)
         return instr
 
     def write(self, outstr):
-        self.dh.write(outstr + chr(0xff) * (64 - len(outstr)))
+        self.hid_device.write(outstr + chr(0xff) * (64 - len(outstr)))
 
-    
+    @property
+    def model(self):
+        self.write(PowerUSBStrip._READ_MODEL)
+        time.sleep(0.020)
+        inbuffer = self.read()
+        return int(inbuffer[0])
+
+    @property
+    def firmware_version(self):
+        self.write(PowerUSBStrip._READ_FIRMWARE_VER)
+        time.sleep(0.020)
+        inbuffer = self.read()
+        return "%d.%d" % (int(inbuffer[0]), int(inbuffer[1]))
+
+    @property
+    def current(self):
+        pass
+
+    @property
+    def power(self):
+        pass
+
     @property
     def manufacturer(self):
-        return self.dh['manufacturer']
+        return self.hid_device['manufacturer']
     
     @property
     def product(self):
-        return self.dh['product']
+        return self.hid_device['product']
 
     @staticmethod
     def strips():
@@ -127,6 +193,10 @@ class PowerUSBStrip(object):
             )
         return [PowerUSBStrip(d) for d in hid_devices]
         
+    @property
+    def status(self):
+        return "Model: %d   Firmware Version: %s" % (self.model, 
+                                                     self.firmware_version)
 
 class PowerUSBSocket(object):
 
@@ -156,10 +226,15 @@ class PowerUSBSocket(object):
 #
 ###############################################################################
 
-def strips(strip_class):
-    for strip in strip_class.strips():
-        pass
-
+def strips():
+    strips = PowerUSBStrip.strips()
+    
+    print "%d device(s) connected" % len(strips)
+    for i in range(0, len(strips)):
+        strip = strips[i]
+        strip.open()
+        print "%d) %s" % (i, strip.status)
+        strip.close()
 
 ###############################################################################
 #
@@ -170,13 +245,5 @@ if __name__ == "__main__":
 
     opts = parse_command_line()
 
-    for strip in PowerUSBStrip.strips():
-        #print strip.device.device_path
-        #print strip.device.subsystem
-        #print strip.manufacturer
-        strip.open()
-        print strip.dh
-        #strip.sockets[0].on()
-        strip.close()
-
-    print opts
+    if opts.strips == True:
+        strips()
