@@ -82,6 +82,10 @@ class PowerUSBStrip(object):
     _vendor_id = 0x04d8
     _product_id = 0x003f
 
+    _model = [None, "Basic", "Digital IO", "Computer Watchdog", "Smart Pro"]
+
+    _power_state = ["off", "on"]
+
     _READ_FIRMWARE_VER	 = chr(0xa7)
     _READ_MODEL		 = chr(0xaa)
 
@@ -157,7 +161,7 @@ class PowerUSBStrip(object):
         self.write(PowerUSBStrip._READ_MODEL)
         time.sleep(0.020)
         inbuffer = self.read()
-        return int(inbuffer[0])
+        return PowerUSBStrip._model[inbuffer[0]]
 
     @property
     def firmware_version(self):
@@ -195,8 +199,9 @@ class PowerUSBStrip(object):
         
     @property
     def status(self):
-        return "Model: %d   Firmware Version: %s" % (self.model, 
-                                                     self.firmware_version)
+        return "Model: %s   Firmware Version: %s" % (
+            self.model, 
+            self.firmware_version)
 
 class PowerUSBSocket(object):
 
@@ -213,13 +218,23 @@ class PowerUSBSocket(object):
         self._strip = strip
         self._socket_num = socket_num
 
-    def on(self):
-        self._strip.write(PowerUSBSocket._on_cmd[self._socket_num - 1])
+    @property
+    def power(self):
+        """Retrieve and return the power state of the socket"""
+        self.strip.write(PowerUSBSocket._state_cmd[self._socket_num - 1])
+        time.sleep(0.020)
+        reply = self.strip.read(64)
+        return int(reply[0])
 
-    def off(self):
-        self._strip.write(PowerUSBSocket._off_cmd[self._socket_num - 1])
+    @power.setter
+    def power(self, on=None):
+        """Set the power state on a socket"""
+        if on == True:
+            self._strip.write(PowerUSBSocket._on_cmd[self._socket_num - 1])
+        elif on == False:
+            self._strip.write(PowerUSBSocket._off_cmd[self._socket_num - 1])
 
-        
+
 ###############################################################################
 #
 # PowerUSB Commands
