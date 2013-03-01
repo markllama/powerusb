@@ -168,15 +168,39 @@ class PowerUSBStrip(object):
         self.write(PowerUSBStrip._READ_FIRMWARE_VER)
         time.sleep(0.020)
         inbuffer = self.read()
-        return "%d.%d" % (int(inbuffer[0]), int(inbuffer[1]))
+        return "%d.%d" % (inbuffer[0], inbuffer[1])
 
     @property
     def current(self):
-        pass
+        """Instantanious Current (mA)"""
+        self.write(PowerUSBStrip._READ_CURRENT)
+        time.sleep(0.020)
+        inbuffer = self.read()
+        if len(inbuffer) > 0:
+            I = inbuffer[0] << 8 | inbuffer[1]
+        else:
+            I = 0
+        return I
 
     @property
     def power(self):
-        pass
+
+        self.write(PowerUSBStrip._READ_CURRENT_CUM)
+        time.sleep(0.020)
+        inbuffer = self.read()
+        if len(inbuffer) >=4:
+            n = inbuffer[0]<<24 | inbuffer[1]<<16 | inbuffer[2]<<8 | inbuffer[3]
+        else:
+            n = 0
+
+        # convert mA*minute to kWh (at 120V)
+        # (mAmin) / 1000 -> Amin
+        # (Amin) / 60 = A*h
+        # (Ah) * 120V = wh
+        # (wh) / 1000 = kwh
+        #  (n / 60) * 120 / 1000 / 1000
+        #  (n * 2) / 1000 / 1000
+        return float(n) / 500000.0
 
     @property
     def manufacturer(self):
@@ -199,9 +223,12 @@ class PowerUSBStrip(object):
         
     @property
     def status(self):
-        return "Model: %s   Firmware Version: %s" % (
+        return "Model: %10s, FW Version: %3s, Curr.(mA) %6.1f, Power (KWh): %5.2f" % (
             self.model, 
-            self.firmware_version)
+            self.firmware_version,
+            self.current,
+            self.power
+            )
 
 class PowerUSBSocket(object):
 
