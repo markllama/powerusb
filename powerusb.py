@@ -287,5 +287,12 @@ if __name__ == "__main__":
 
     opts = parse_command_line()
 
+    print opts
+
     if opts.strips == True:
         strips()
+    elif opts.command == 'status':
+        # validate the socket spec
+        print opts.command + ": " + opts.socket[0]
+    elif opts.command == 'socket':
+        print opts.command + ": " + opts.socket[0]
