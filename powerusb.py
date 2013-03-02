@@ -135,9 +135,9 @@ class PowerUSBStrip(object):
     
     def __init__(self, hid_device):
         self.hid_device = hid_device
-        self.sockets = []
+        self.socket = [None]
         for socket_num in range(1,4):
-            self.sockets.append(PowerUSBSocket(self, socket_num))
+            self.socket.append(PowerUSBSocket(self, socket_num))
 
     @property
     def device(self):
@@ -221,13 +221,15 @@ class PowerUSBStrip(object):
             )
         return [PowerUSBStrip(d) for d in hid_devices]
         
-    @property
-    def status(self):
-        return "Model: %10s, FW Version: %3s, Curr.(mA) %6.1f, Power (KWh): %5.2f" % (
+    def __str__(self):
+        return "%-10s, FW Vers: %3s, Curr.(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
             self.model, 
             self.firmware_version,
             self.current,
-            self.power
+            self.power,
+            self.socket[1].power,
+            self.socket[2].power,
+            self.socket[3].power
             )
 
 class PowerUSBSocket(object):
@@ -241,6 +243,8 @@ class PowerUSBSocket(object):
     _state_cmd = [chr(0xa1), chr(0xa2), chr(0xac)]
     _defstate_cmd = [chr(0xa3), chr(0xa4), chr(0xad)]
 
+    _state_str = ['off', 'on']
+
     def __init__(self, strip, socket_num):
         self._strip = strip
         self._socket_num = socket_num
@@ -248,10 +252,10 @@ class PowerUSBSocket(object):
     @property
     def power(self):
         """Retrieve and return the power state of the socket"""
-        self.strip.write(PowerUSBSocket._state_cmd[self._socket_num - 1])
+        self._strip.write(PowerUSBSocket._state_cmd[self._socket_num - 1])
         time.sleep(0.020)
-        reply = self.strip.read(64)
-        return int(reply[0])
+        reply = self._strip.read()
+        return PowerUSBSocket._state_str[reply[0]]
 
     @power.setter
     def power(self, on=None):
@@ -275,7 +279,7 @@ def strips():
     for i in range(0, len(strips)):
         strip = strips[i]
         strip.open()
-        print "%d) %s" % (i, strip.status)
+        print "%d) %s" % (i, strip)
         strip.close()
 
 ###############################################################################
