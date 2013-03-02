@@ -25,6 +25,7 @@ powerusb --meter <strip> [--cumulative|--reset]]
 import argparse
 import re
 import time
+import xml.dom.minidom as xml
 import hidapi
 
 ##############################################################################
@@ -232,6 +233,44 @@ class PowerUSBStrip(object):
             self.socket[3].power
             )
 
+    def xml(self):
+        """
+        <?xml?>
+        <powerstrips xmlns="">
+          <powerstrip model="basic" firmware="3.1">
+            <current>150.0</current>
+            <power>2.96</power>
+            <sockets>
+              <socket number="1">
+                <power>[on|off]</power>
+                <default>[on|off]</power>
+              </socket>
+              <socket number="2">
+                <power>[on|off]</power>
+                <default>[on|off]</power>
+              </socket>
+              <socket number="2">
+                <power>[on|off]</power>
+                <default>[on|off]</power>
+              </socket>
+            </sockets>
+        </powerstrips>
+        """
+
+        strip = xml.Element("powerstrip")
+        strip.setAttribute("model", self.model)
+        strip.setAttribute("fw_version", self.firmware_version)
+
+        strip.appendChild(xml.Text("current", self.current))
+        strip.appendChild(xml.Text("power", self.power))
+        sockets = xml.Element("sockets")
+        for socket_number in range(1,4):
+            sockets.appendChild(self._sockets[i].xml())
+        strip.appendChild(sockets)
+            
+        return strip
+        
+
 class PowerUSBSocket(object):
 
     _on_cmd = ['A', 'C', 'E']
@@ -265,6 +304,29 @@ class PowerUSBSocket(object):
         elif on == False:
             self._strip.write(PowerUSBSocket._off_cmd[self._socket_num - 1])
 
+    @property
+    def default(self):
+        """Retrieve and return the default power state of the socket"""
+        self._strip.write(PowerUSBSocket._defdstate_cmd[self._socket_num - 1])
+        time.sleep(0.020)
+        reply = self._strip.read()
+        return PowerUSBSocket._state_str[reply[0]]
+
+    @default.setter
+    def default(self, on=None):
+        """Set the power state on a socket"""
+        if on == True:
+            self._strip.write(PowerUSBSocket._defon_cmd[self._socket_num - 1])
+        elif on == False:
+            self._strip.write(PowerUSBSocket._defoff_cmd[self._socket_num - 1])
+
+    def xml(self):
+        socket = xml.Element("socket")
+        socket.setAttribute('number', self._socket_num)
+        socket.appendChild("power", self.power)
+        socket.appendChild("default", self.default)
+
+        return socket
 
 ###############################################################################
 #
