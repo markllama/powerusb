@@ -47,8 +47,13 @@ def parse_command_line():
 
     parser = argparse.ArgumentParser(description="Manage power strips")
     parser.add_argument("--verbose", "-v", action="store_true")
-    parser.add_argument("--xml", "-x", action="store_true")
-    parser.add_argument("--json", "-j", action="store_true")
+    fmt_group = parser.add_mutually_exclusive_group()
+    fmt_group.add_argument("--text", "-t", dest="format", 
+                           action="store_const", const="text", default="text", )
+    fmt_group.add_argument("--xml", "-x", dest="format", 
+                           action="store_const", const="xml")
+    fmt_group.add_argument("--json", "-j", dest="format",
+                           action="store_const", const="json")
     cmd_group = parser.add_mutually_exclusive_group()
     cmd_group.add_argument("--strips", "-l", action="store_true")
     cmd_group.add_argument("--status", '-s', metavar="SOCKETSPEC", 
@@ -258,14 +263,24 @@ class PowerUSBStrip(object):
         """
 
         strip = xml.Element("powerstrip")
-        strip.setAttribute("model", self.model)
-        strip.setAttribute("fw_version", self.firmware_version)
+        strip.setAttribute("model", str(self.model))
+        strip.setAttribute("fw_version", str(self.firmware_version))
 
-        strip.appendChild(xml.Text("current", self.current))
-        strip.appendChild(xml.Text("power", self.power))
+
+        current = xml.Element("current")
+        curtext = xml.Text()
+        curtext.replaceWholeText(self.current)
+        current.appendChild(curtext)
+        strip.appendChild(current)
+
+        power = xml.Element("power")
+        pwrtext = xml.Text()
+        pwrtext.replaceWholeText(self.power)
+        power.appendChild(pwrtext)
+        strip.appendChild(power)
         sockets = xml.Element("sockets")
         for socket_number in range(1,4):
-            sockets.appendChild(self._sockets[i].xml())
+            sockets.appendChild(self.socket[socket_number].xml())
         strip.appendChild(sockets)
             
         return strip
@@ -307,7 +322,7 @@ class PowerUSBSocket(object):
     @property
     def default(self):
         """Retrieve and return the default power state of the socket"""
-        self._strip.write(PowerUSBSocket._defdstate_cmd[self._socket_num - 1])
+        self._strip.write(PowerUSBSocket._defstate_cmd[self._socket_num - 1])
         time.sleep(0.020)
         reply = self._strip.read()
         return PowerUSBSocket._state_str[reply[0]]
@@ -322,9 +337,18 @@ class PowerUSBSocket(object):
 
     def xml(self):
         socket = xml.Element("socket")
-        socket.setAttribute('number', self._socket_num)
-        socket.appendChild("power", self.power)
-        socket.appendChild("default", self.default)
+        socket.setAttribute('number', str(self._socket_num))
+        
+        power = xml.Element("power")
+        pwrtext = xml.Text()
+        pwrtext.replaceWholeText(self.power)
+        power.appendChild(pwrtext)
+        socket.appendChild(power)
+        default = xml.Element("default")
+        deftext = xml.Text()
+        deftext.replaceWholeText(self.default)
+        default.appendChild(deftext)
+        socket.appendChild(default)
 
         return socket
 
@@ -334,15 +358,25 @@ class PowerUSBSocket(object):
 #
 ###############################################################################
 
-def strips():
+def strips(format):
     strips = PowerUSBStrip.strips()
     
-    print "%d device(s) connected" % len(strips)
-    for i in range(0, len(strips)):
-        strip = strips[i]
-        strip.open()
-        print "%d) %s" % (i, strip)
-        strip.close()
+    if format == "text":
+        print "%d device(s) connected" % len(strips)
+        for i in range(0, len(strips)):
+            strip = strips[i]
+            strip.open()
+            print "%d) %s" % (i, strip)
+            strip.close()
+
+    elif format == "xml":
+        stripxml = xml.Element("powerstrips")
+        for i in range(0, len(strips)):
+            strip = strips[i]
+            strip.open()
+            stripxml.appendChild(strip.xml())
+            strip.close()
+        print stripxml.toprettyxml()
 
 ###############################################################################
 #
@@ -356,7 +390,7 @@ if __name__ == "__main__":
     print opts
 
     if opts.strips == True:
-        strips()
+        strips(opts.format)
     elif opts.command == 'status':
         # validate the socket spec
         print opts.command + ": " + opts.socket[0]
