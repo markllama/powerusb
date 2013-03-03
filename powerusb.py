@@ -26,6 +26,7 @@ import argparse
 import re
 import time
 import xml.dom.minidom as xml
+import json
 import hidapi
 
 ##############################################################################

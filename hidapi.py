@@ -40,29 +40,39 @@ USB_ENDPOINT_OUT = 0x00
 
 def hid_enumerate(vendor_id, product_id):
 
-    # Find matching devices FIRST
-    usb_devices = [d for b in usb.busses() for d in b.devices
-                   if d.deviceClass == USB_CLASS_PER_INTERFACE
-                   and d.idVendor == vendor_id and d.idProduct == product_id]
-
-    
     hid_devices = []
-    for d in usb_devices:
-        for c in d.configurations:
-            for ilist in c.interfaces:
-                for interface in ilist:
-                    if interface.interfaceClass == USB_CLASS_HID:
-                        hid_devices.append(d)
 
-    return [HIDDevice(d) for d in hid_devices]
-            
+    busses = usb.busses()
+    
+    # check each bus
+    for b_index in range(0, len(busses)):
+        bus = busses[b_index]
+        # check each device on a bus
+        for d_index in range(0, len(bus.devices)):
+            device = bus.devices[d_index]
+
+            # If the device matches all criteria
+            if device.deviceClass == USB_CLASS_PER_INTERFACE \
+                and device.idVendor == vendor_id \
+                and device.idProduct == product_id:
+
+                for c in device.configurations:
+                    for ilist in c.interfaces:
+                        for interface in ilist:
+                            if interface.interfaceClass == USB_CLASS_HID:
+                                hid_devices.append(
+                                    HIDDevice(device, b_index, d_index))
+
+    return hid_devices
+                                                   
 
 class HIDDevice():
 
-    def __init__(self, usb_device):
+    def __init__(self, usb_device, bus_index=None, device_index=None):
         self.usb_device = usb_device
         self.dh = None
         self.blocking = True
+                                                  
         
     @property
     def configuration(self):
