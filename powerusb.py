@@ -150,6 +150,14 @@ class PowerUSBStrip(object):
     def device(self):
         return self.hid_device
 
+    @property
+    def busnum(self):
+        return self.hid_device.busnum
+
+    @property
+    def devnum(self):
+        return self.hid_device.devnum
+
     def open(self):
         self.hid_device.open()
 
@@ -266,7 +274,8 @@ class PowerUSBStrip(object):
         strip = xml.Element("powerstrip")
         strip.setAttribute("model", str(self.model))
         strip.setAttribute("fw_version", str(self.firmware_version))
-
+        strip.setAttribute("busnum", str(self.busnum))
+        strip.setAttribute("devnum", str(self.devnum))
 
         current = xml.Element("current")
         curtext = xml.Text()

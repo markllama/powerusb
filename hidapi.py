@@ -72,7 +72,8 @@ class HIDDevice():
         self.usb_device = usb_device
         self.dh = None
         self.blocking = True
-                                                  
+        self.busnum = bus_index
+        self.devnum = device_index
         
     @property
     def configuration(self):
