@@ -120,11 +120,11 @@ class HIDDevice():
         self.dh.interruptWrite(
             self.output_endpoint.address, 
             buffer + chr(0xff) * (64 - len(buffer)),
-            200
+            500
             )
 
     def read(self, size):
-        return self.dh.interruptRead(self.input_endpoint.address, 64, 200)
+        return self.dh.interruptRead(self.input_endpoint.address, 64, 500)
 
     @staticmethod
     def devices(vendor_id=None, product_id=None):
