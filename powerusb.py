@@ -237,7 +237,9 @@ class PowerUSBStrip(object):
         return [PowerUSBStrip(d) for d in hid_devices]
         
     def __str__(self):
-        return "%-10s, FW Vers: %3s, Curr.(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
+        return "%d:%d, %-9s, FWVer: %3s, Curr(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
+            self.devnum,
+            self.busnum,
             self.model, 
             self.firmware_version,
             self.current,
