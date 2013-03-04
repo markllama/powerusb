@@ -119,14 +119,24 @@ class HIDDevice():
 
     def write(self, buffer):
         """Write to the interrupt output endpoint"""
-        self.dh.interruptWrite(
-            self.output_endpoint.address, 
-            buffer + chr(0xff) * (64 - len(buffer)),
-            HIDDevice._timeout
-            )
+        try:
+            self.dh.interruptWrite(
+                self.output_endpoint.address, 
+                buffer + chr(0xff) * (64 - len(buffer)),
+                HIDDevice._timeout
+                )
+        except usb.USBError(e):
+            pass
 
     def read(self, size):
-        return self.dh.interruptRead(self.input_endpoint.address, 64, HIDDevice._timeout)
+        
+        try:
+            outstring = self.dh.interruptRead(self.input_endpoint.address, 
+                                              64, HIDDevice._timeout)
+        except usb.USBError(e):
+            pass
+
+        return outstring
 
     @staticmethod
     def devices(vendor_id=None, product_id=None):
