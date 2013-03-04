@@ -388,7 +388,7 @@ def strips(format):
             strip.open()
             stripxml.appendChild(strip.xml())
             strip.close()
-        print stripxml.toprettyxml()
+        print stripxml.toprettyxml(indent="  ")
 
 ###############################################################################
 #
