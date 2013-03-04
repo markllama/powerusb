@@ -140,6 +140,8 @@ class PowerUSBStrip(object):
     _DISP_TEXT		 = chr(0x88)
     _SET_PASS		 = chr(0x89)
     
+    _sleep_duration = 0.500 # seconds
+
     def __init__(self, hid_device):
         self.hid_device = hid_device
         self.socket = [None]
@@ -174,14 +176,14 @@ class PowerUSBStrip(object):
     @property
     def model(self):
         self.write(PowerUSBStrip._READ_MODEL)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         return PowerUSBStrip._model[inbuffer[0]]
 
     @property
     def firmware_version(self):
         self.write(PowerUSBStrip._READ_FIRMWARE_VER)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         return "%d.%d" % (inbuffer[0], inbuffer[1])
 
@@ -189,7 +191,7 @@ class PowerUSBStrip(object):
     def current(self):
         """Instantanious Current (mA)"""
         self.write(PowerUSBStrip._READ_CURRENT)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         if len(inbuffer) > 0:
             I = inbuffer[0] << 8 | inbuffer[1]
@@ -201,7 +203,7 @@ class PowerUSBStrip(object):
     def power(self):
 
         self.write(PowerUSBStrip._READ_CURRENT_CUM)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         if len(inbuffer) >=4:
             n = inbuffer[0]<<24 | inbuffer[1]<<16 | inbuffer[2]<<8 | inbuffer[3]
@@ -227,11 +229,11 @@ class PowerUSBStrip(object):
 
     def all_on(self):
         self.write(PowerUSBStrip._ALL_PORT_ON)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
 
     def all_off(self):
         self.write(PowerUSBStrip._ALL_PORT_OFF)
-        time.sleep(0.500)
+        time.sleep(PowerUSBStri._sleep_duration)
 
     def all_off(self):
         pass
@@ -330,7 +332,7 @@ class PowerUSBSocket(object):
     def power(self):
         """Retrieve and return the power state of the socket"""
         self._strip.write(PowerUSBSocket._state_cmd[self._socket_num - 1])
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         reply = self._strip.read()
         return PowerUSBSocket._state_str[reply[0]]
 
@@ -346,7 +348,7 @@ class PowerUSBSocket(object):
     def default(self):
         """Retrieve and return the default power state of the socket"""
         self._strip.write(PowerUSBSocket._defstate_cmd[self._socket_num - 1])
-        time.sleep(0.500)
+        time.sleep(PowerUSBStrip._sleep_duration)
         reply = self._strip.read()
         return PowerUSBSocket._state_str[reply[0]]
 

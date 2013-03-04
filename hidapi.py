@@ -68,6 +68,8 @@ def hid_enumerate(vendor_id, product_id):
 
 class HIDDevice():
 
+    _timeout = 1000 # milliseconds
+
     def __init__(self, usb_device, bus_index=None, device_index=None):
         self.usb_device = usb_device
         self.dh = None
@@ -120,11 +122,11 @@ class HIDDevice():
         self.dh.interruptWrite(
             self.output_endpoint.address, 
             buffer + chr(0xff) * (64 - len(buffer)),
-            500
+            HIDDevice._timeout
             )
 
     def read(self, size):
-        return self.dh.interruptRead(self.input_endpoint.address, 64, 500)
+        return self.dh.interruptRead(self.input_endpoint.address, 64, HIDDevice._timeout)
 
     @staticmethod
     def devices(vendor_id=None, product_id=None):
