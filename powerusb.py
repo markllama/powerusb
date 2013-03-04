@@ -225,6 +225,17 @@ class PowerUSBStrip(object):
     def product(self):
         return self.hid_device['product']
 
+    def all_on(self):
+        self.write(PowerUSBStrip._ALL_PORT_ON)
+        time.sleep(0.020)
+
+    def all_off(self):
+        self.write(PowerUSBStrip._ALL_PORT_OFF)
+        time.sleep(0.020)
+
+    def all_off(self):
+        pass
+        
     @staticmethod
     def strips():
         """
@@ -326,9 +337,9 @@ class PowerUSBSocket(object):
     @power.setter
     def power(self, on=None):
         """Set the power state on a socket"""
-        if on == True:
+        if on == True or on == "on":
             self._strip.write(PowerUSBSocket._on_cmd[self._socket_num - 1])
-        elif on == False:
+        elif on == False or on == "off":
             self._strip.write(PowerUSBSocket._off_cmd[self._socket_num - 1])
 
     @property
@@ -370,7 +381,7 @@ class PowerUSBSocket(object):
 #
 ###############################################################################
 
-def strips(format):
+def strip_status(format):
     strips = PowerUSBStrip.strips()
     
     if format == "text":
@@ -395,6 +406,7 @@ def strips(format):
 # MAIN
 #
 ###############################################################################
+
 if __name__ == "__main__":
 
     opts = parse_command_line()
@@ -402,9 +414,43 @@ if __name__ == "__main__":
     print opts
 
     if opts.strips == True:
-        strips(opts.format)
+        strip_status(opts.format)
     elif opts.command == 'status':
         # validate the socket spec
         print opts.command + ": " + opts.socket[0]
     elif opts.command == 'socket':
-        print opts.command + ": " + opts.socket[0]
+
+        strips = PowerUSBStrip.strips()
+
+        for currspec in opts.socket:
+            busstr, devstr, sockstr = currspec.split(':')
+            busnum = int(busstr)
+            devnum = int(devstr)
+            socknum = int(sockstr)
+
+            matchstrips = [s for s in strips if s.busnum == busnum and s.devnum == devnum]
+
+            if len(matchstrips) != 1:
+                print "error: more than one strip matches %s" % currespec
+                continue
+
+            currstrip = matchstrips[0]
+            currstrip.open()
+            # get the strip containing the socket
+
+            if opts.on == None:
+                # request the power state for the socket
+                print "strip %s:%s socket %s: %s" % (
+                    busstr, devstr, sockstr, currstrip.socket[socknum].power)
+
+            elif opts.on == True:
+                # set the socket on
+                currstrip.socket[socknum].power = "on"
+
+            elif opts.on == False:
+                # set the socket off
+                currstrip.socket[socknum].power = "off"
+
+
+
+            currstrip.close()
