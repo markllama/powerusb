@@ -69,6 +69,7 @@ def parse_command_line():
     parser.add_argument("--default", action="store_true")
     parser.add_argument("--cumulative", action="store_true")
     parser.add_argument("--reset", action="store_true")
+    parser.add_argument("--debug", "-d", action="store_true", default=False)
     return parser.parse_args()
 
 ###############################################################################
@@ -413,7 +414,7 @@ if __name__ == "__main__":
 
     opts = parse_command_line()
 
-    print opts
+    if opts.debug: print opts
 
     if opts.strips == True:
         strip_status(opts.format)
