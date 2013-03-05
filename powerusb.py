@@ -140,7 +140,7 @@ class PowerUSBStrip(object):
     _DISP_TEXT		 = chr(0x88)
     _SET_PASS		 = chr(0x89)
     
-    _sleep_duration = 0.500 # seconds
+    _sleep_duration = 0.020 # seconds
 
     def __init__(self, hid_device):
         self.hid_device = hid_device

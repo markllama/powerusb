@@ -68,7 +68,7 @@ def hid_enumerate(vendor_id, product_id):
 
 class HIDDevice():
 
-    _timeout = 1000 # milliseconds
+    _timeout = 0 # milliseconds
 
     def __init__(self, usb_device, bus_index=None, device_index=None):
         self.usb_device = usb_device
