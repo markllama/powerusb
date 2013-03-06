@@ -56,19 +56,47 @@ def parse_command_line():
     fmt_group.add_argument("--json", "-j", dest="format",
                            action="store_const", const="json")
     cmd_group = parser.add_mutually_exclusive_group()
+
     cmd_group.add_argument("--list_strips", "-l", action="store_true")
-    cmd_group.add_argument("--status", '-s', metavar="SOCKETSPEC", 
+    cmd_group.add_argument("--strip", '-s', metavar="STRIPSPEC", 
                            action=CommandAction, dest="command", nargs="+")
+    strip_actions = parser.add_mutually_exclusive_group()
+    strip_actions.add_argument("--current", const="current",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--power", const="power",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--reset_power", const="resetpower",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--get_overload", const="getoverload",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--set_overload", const="setoverload",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--set_current_ratio", const="setcurrratio",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--reset", const="resetstrip",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--set_current_offset", const="setcurroffset",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--allon", const="allon",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--alloff", const="alloff",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--set_mode", const="setmode",
+                               dest="stripcmd", action="store_const")
+    strip_actions.add_argument("--get_mode", const="getmode",
+                               dest="stripcmd", action="store_const")
+
     cmd_group.add_argument("--socket", "-p", metavar="SOCKETSPEC",
                            action=CommandAction, dest="command", nargs="+")
     cmd_group.add_argument("--meter", "-m", metavar="SOCKETSPEC",
                            action=CommandAction, dest="command", nargs="+")
+
     on_off = parser.add_mutually_exclusive_group()
     on_off.add_argument("--on", dest="on", action="store_true", default=None) 
     on_off.add_argument("--off", dest="on", action="store_false")
     parser.add_argument("--default", action="store_true")
     parser.add_argument("--cumulative", action="store_true")
-    parser.add_argument("--reset", action="store_true")
+    #parser.add_argument("--reset", action="store_true")
     parser.add_argument("--debug", "-d", action="store_true", default=False)
     return parser.parse_args()
 
@@ -420,6 +448,7 @@ if __name__ == "__main__":
     elif opts.command == 'status':
         # validate the socket spec
         print opts.command + ": " + opts.socket[0]
+
     elif opts.command == 'socket':
 
         strips = PowerUSBStrip.strips()
