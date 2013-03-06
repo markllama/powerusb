@@ -355,10 +355,9 @@ class PowerUSBSocket(object):
 
     @default.setter
     def default(self, on=None):
-        """Set the power state on a socket"""
-        if on == True:
+        if on == "on":
             self._strip.write(PowerUSBSocket._defon_cmd[self._socket_num - 1])
-        elif on == False:
+        elif on == "off":
             self._strip.write(PowerUSBSocket._defoff_cmd[self._socket_num - 1])
 
     def xml(self):
@@ -443,16 +442,28 @@ if __name__ == "__main__":
 
             if opts.on == None:
                 # request the power state for the socket
-                print "strip %s:%s socket %s: %s" % (
-                    busstr, devstr, sockstr, currstrip.socket[socknum].power)
+                if opts.default:
+                    print "strip %s:%s socket %s: %s (default)" % (
+                        busstr, devstr, sockstr, currstrip.socket[socknum].power)
+                else:
+                    print "strip %s:%s socket %s: %s" % (
+                        busstr, devstr, sockstr, currstrip.socket[socknum].power)
 
             elif opts.on == True:
-                # set the socket on
-                currstrip.socket[socknum].power = "on"
+                if opts.default:
+                    # set the socket default on
+                    currstrip.socket[socknum].default = "on"
+                else:
+                    # set the socket on
+                    currstrip.socket[socknum].power = "on"
 
             elif opts.on == False:
-                # set the socket off
-                currstrip.socket[socknum].power = "off"
+                if opts.default:
+                    # set the socket default on
+                    currstrip.socket[socknum].default = "off"
+                else:                                         
+                    # set the socket off
+                    currstrip.socket[socknum].default = "off"
 
 
 
