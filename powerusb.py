@@ -56,7 +56,7 @@ def parse_command_line():
     fmt_group.add_argument("--json", "-j", dest="format",
                            action="store_const", const="json")
     cmd_group = parser.add_mutually_exclusive_group()
-    cmd_group.add_argument("--strips", "-l", action="store_true")
+    cmd_group.add_argument("--list_strips", "-l", action="store_true")
     cmd_group.add_argument("--status", '-s', metavar="SOCKETSPEC", 
                            action=CommandAction, dest="command", nargs="+")
     cmd_group.add_argument("--socket", "-p", metavar="SOCKETSPEC",
@@ -415,7 +415,7 @@ if __name__ == "__main__":
 
     if opts.debug: print opts
 
-    if opts.strips == True:
+    if opts.list_strips == True:
         strip_status(opts.format)
     elif opts.command == 'status':
         # validate the socket spec
