@@ -26,6 +26,8 @@ import argparse
 import re
 import time
 import xml.dom.minidom as xml
+import lxml.etree as etree
+
 import json
 import hidapi
 
@@ -248,6 +250,11 @@ class PowerUSBStrip(object):
         #  (n * 2) / 1000 / 1000
         return float(n) / 500000.0
 
+    def reset_power(self):
+        """Clear the accumulate power measurement"""
+        self.write(PowerUSBStrip._READ_CURRENT_CUM)
+        time.sleep(PowerUSBStrip._sleep_duration)
+
     @property
     def manufacturer(self):
         return self.hid_device['manufacturer']
@@ -264,9 +271,25 @@ class PowerUSBStrip(object):
         self.write(PowerUSBStrip._ALL_PORT_OFF)
         time.sleep(PowerUSBStri._sleep_duration)
 
-    def all_off(self):
-        pass
+    def reset(self):
+        self.write(PowerUSBStrip._RESET_BOARD)
+        time.sleep(PowerUSBStrip._sleep_duration)
+
+    @property
+    def overload(self):
+        self.write(PowerUSBStrip._READ_OVERLOAD)
+        time.sleep(PowerUSBStrip._sleep_duration)
+        inbuffer = self.read()
+        return int(inbuffer[0])
         
+    @overload.setter
+    def overload(self, ol):
+        self.write(int(ol))
+        time.sleep(PowerUSBStri._sleep_duration)
+
+        
+        
+
     @staticmethod
     def strips():
         """
@@ -334,11 +357,32 @@ class PowerUSBStrip(object):
         strip.appendChild(power)
         sockets = xml.Element("sockets")
         for socket_number in range(1,4):
-            sockets.appendChild(self.socket[socket_number].xml())
+            sockets.appendChild(self.socket[socket_number].etree())
         strip.appendChild(sockets)
             
         return strip
         
+    def etree(self):
+
+        strip = etree.Element("powerstrip")
+        strip.set("model", str(self.model))
+        strip.set("fw_version", str(self.firmware_version))
+        strip.set("busnum", str(self.busnum))
+        strip.set("devnum", str(self.devnum))
+
+        current = etree.Element("current")
+        current.text = self.current
+        strip.append(current)
+        
+        power = etree.Element("power")
+        power.text = self.power
+        strip.append(power)
+
+        sockets = etree.Element("sockets")
+        for socket_number in range(1,4):
+            sockets.append(self.socket[socket_number].etree())
+
+        return strip
 
 class PowerUSBSocket(object):
 
@@ -405,6 +449,20 @@ class PowerUSBSocket(object):
 
         return socket
 
+    def etree(self):
+        socket = etree.Element("socket")
+        socket.set("number", str(self._socket_num))
+
+        power = etree.Element("power")
+        power.text = self.power
+        socket.append(power)
+
+        default = etree.Element("default")
+        default.text = self.default
+        socket.append(default)
+
+        return socket
+
 ###############################################################################
 #
 # PowerUSB Commands
@@ -423,13 +481,24 @@ def strip_status(format):
             strip.close()
 
     elif format == "xml":
-        stripxml = xml.Element("powerstrips")
+        #stripxml = xml.Element("powerstrips")
+        #for i in range(0, len(strips)):
+        #    strip = strips[i]
+        #    strip.open()
+        #    stripxml.appendChild(strip.xml())
+        #    strip.close()
+        #print stripxml.toprettyxml(indent="  ")
+        
+        stripxml = etree.Element("powerstrips")
         for i in range(0, len(strips)):
             strip = strips[i]
             strip.open()
-            stripxml.appendChild(strip.xml())
+            stripxml.append(strip.etree())
             strip.close()
-        print stripxml.toprettyxml(indent="  ")
+
+        etree.dump(stripxml, pretty_print=True)
+        print ""
+        
 
 ###############################################################################
 #
