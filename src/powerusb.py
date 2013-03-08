@@ -3,6 +3,7 @@
 # PowerUSB Objects
 #
 ###############################################################################
+import hidapi
 
 class PowerUSBStrip(object):
 
