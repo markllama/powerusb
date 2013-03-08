@@ -29,7 +29,8 @@ import xml.dom.minidom as xml
 import lxml.etree as etree
 
 import json
-import hidapi
+
+from powerusb import *
 
 ##############################################################################
 #
