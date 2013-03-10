@@ -48,7 +48,9 @@ if __name__ == "__main__":
 
     if opt.list_strips:
         for strip in PowerUSBStrip.strips():
+            strip.open()
             print strip
+            strip.close()
 
     elif opt.strip != None:
         print "query or set power strip %s" % opt.strip
