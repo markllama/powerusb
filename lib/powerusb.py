@@ -263,11 +263,11 @@ class PowerUSBStrip(object):
         strip.set("devnum", str(self.devnum))
 
         current = etree.Element("current")
-        current.text = self.current
+        current.text = str(self.current)
         strip.append(current)
         
         power = etree.Element("power")
-        power.text = self.power
+        power.text = str(self.power)
         strip.append(power)
 
         sockets = etree.Element("sockets")
