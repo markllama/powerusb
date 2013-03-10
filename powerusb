@@ -2,7 +2,7 @@
 
 import argparse
 
-import powerusb
+from powerusb import *
 
 """
 pwrusb --list-strips
@@ -45,8 +45,10 @@ if __name__ == "__main__":
 
     opt = parse_arguments()
 
+
     if opt.list_strips:
-        print "list all power strips"
+        for strip in PowerUSBStrip.strips():
+            print strip
 
     elif opt.strip != None:
         print "query or set power strip %s" % opt.strip
