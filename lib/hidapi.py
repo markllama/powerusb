@@ -125,8 +125,8 @@ class HIDDevice():
                 buffer + chr(0xff) * (64 - len(buffer)),
                 HIDDevice._timeout
                 )
-        except usb.USBError(e):
-            pass
+        except usb.USBError():
+            raise
 
     def read(self, size):
         
