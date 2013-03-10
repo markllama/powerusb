@@ -4,6 +4,7 @@
 #
 ###############################################################################
 import time
+import lxml.etree as etree
 import hidapi
 
 class PowerUSBStrip(object):

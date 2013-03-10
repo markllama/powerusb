@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import lxml.etree as etree
 
 from powerusb import *
 
@@ -45,12 +46,20 @@ if __name__ == "__main__":
 
     opt = parse_arguments()
 
-
     if opt.list_strips:
-        for strip in PowerUSBStrip.strips():
-            strip.open()
-            print strip
-            strip.close()
+        if opt.format == "text":
+            for strip in PowerUSBStrip.strips():
+                strip.open()
+                print strip
+                strip.close()
+        elif opt.format == "xml":
+            estrips = etree.Element("powerstrips")
+            doc = etree.ElementTree(element=estrips)
+            for strip in PowerUSBStrip.strips():
+                strip.open()
+                estrips.append(strip.etree())
+                strip.close()
+            print etree.tostring(doc, pretty_print=True)
 
     elif opt.strip != None:
         print "query or set power strip %s" % opt.strip
