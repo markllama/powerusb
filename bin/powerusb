@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import re
 import lxml.etree as etree
 
 from powerusb import *
@@ -42,9 +43,29 @@ def parse_arguments():
 
     return parser.parse_args()
 
+def find_strip(bus, device):
+    for strip in PowerUSBStrip.strips():
+        if strip.bus == bus and strip.device == device:
+            return strip
+
+    return None
+
+bus_re = re.compile("(\d+):(\d+)(:(\d+))?")
+
+def parse_socket(socket_string):
+    
+    m = bus_re.match(socket_string)
+    if m == None:
+        raise ValueError("invalid bus/socket string: %s" % socket_string)
+
+    # return the bus and device number.  Socket number is optional
+    return (int(m.group(1)), int(m.group(2)), m.group(4) and int(m.group(4)))
+
 if __name__ == "__main__":
 
     opt = parse_arguments()
+
+    print opt
 
     if opt.list_strips:
         if opt.format == "text":
@@ -64,7 +85,37 @@ if __name__ == "__main__":
     elif opt.strip != None:
         print "query or set power strip %s" % opt.strip
 
+        # find the strip object
+        strip_id = parse_socket(opt.strip)
+        print "strip_id = %s" % str(strip_id[0:2])
+
+        strip = find_strip(strip_id[0], strip_id[1])
+        if strip == None:
+            print("no such strip device: %s" % opt.strip)
+            exit(1)
+
+        if opt.action == None:
+            """status"""
+
+        elif opt.action in ['on', 'off']:
+            """turn power on or off"""
+
     elif opt.socket != None:
         print "query or set power socket %s" % opt.socket
 
+        socket_id = parse_socket(opt.socket)
+        print "socket_id = %s" % str(socket_id)
+
+        strip = find_strip(socket_id[0], socket_id[1])
+        if strip == None:
+            print("no such strip device: %s" % opt.socket)
+            exit(1)
+
+        # find the strip object
+
+        if opt.action == None:
+            """Status"""
+
+        elif opt.action in ['on', 'off']:
+            """ turn the socket on or off"""
 
