@@ -45,7 +45,7 @@ def parse_arguments():
 
 def find_strip(bus, device):
     for strip in PowerUSBStrip.strips():
-        if strip.bus == bus and strip.device == device:
+        if strip.busnum == bus and strip.devnum == device:
             return strip
 
     return None
