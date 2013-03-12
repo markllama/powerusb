@@ -1,6 +1,6 @@
 Summary: Control PowerUSB power strips
 Name: powerusb
-Version: 1.1
+Version: 1.2
 Release: 1
 Source0: %{name}-%{version}.tar.gz
 License: Apache License 2.0
