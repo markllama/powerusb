@@ -1,13 +1,8 @@
-#%define name powerusb
-#%define version 1.0
-%define unmangled_version 1.0
-#%define release 1
-
 Summary: Control PowerUSB power strips
 Name: powerusb
 Version: 1.1
 Release: 1
-Source0: %{name}-%{unmangled_version}.tar.gz
+Source0: %{name}-%{version}.tar.gz
 License: Apache License 2.0
 Group: Development/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
@@ -25,7 +20,7 @@ features TBD.
 
 
 %prep
-%setup -n %{name}-%{unmangled_version}
+%setup -n %{name}-%{version}
 
 %build
 python setup.py build
