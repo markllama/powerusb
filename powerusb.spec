@@ -1,12 +1,12 @@
-%define name powerusb
-%define version 1.0
+#%define name powerusb
+#%define version 1.0
 %define unmangled_version 1.0
-%define release 1
+#%define release 1
 
 Summary: Control PowerUSB power strips
-Name: %{name}
-Version: %{version}
-Release: %{release}
+Name: powerusb
+Version: 1.0
+Release: 1
 Source0: %{name}-%{unmangled_version}.tar.gz
 License: Apache License 2.0
 Group: Development/Libraries
