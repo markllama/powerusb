@@ -15,11 +15,14 @@ Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Mark Lamourine <markllama@gmail.com>
 Url: http://github.com/markllama/powerusb
-Requires: python(lxml)
-Requires: python(pyusb)
 
 %description
-Library and CLI tool to manage PowerUSB power strips
+
+Library and CLI tools to Control PowerUSB power strips.
+
+This version only controls Basic power strips.  Watchdog, IO and Smart
+features TBD.
+
 
 %prep
 %setup -n %{name}-%{unmangled_version}
