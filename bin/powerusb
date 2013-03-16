@@ -135,7 +135,12 @@ if __name__ == "__main__":
 
         if opt.action == None:
             """Status"""
+	    strip.open()
+            print "strip %d:%d socket %d: %s" % \
+	       tuple(socket_id + (strip.socket[int(socket_id[2])].power,))
+            strip.close()
 
         elif opt.action in ['on', 'off']:
             """ turn the socket on or off"""
+            print "turn strip %d:%d socket %d %s " % tuple(socket_id + (opt.action,))
 
