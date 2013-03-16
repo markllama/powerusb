@@ -7,14 +7,14 @@ __NOTE__: a number of features are TBD
 Each strip is identified by the USB bus and device numbers. A strip ID
 is the bus number and device number separated by a colon:
 
-    0:1 # The power strip on bus 0, device 1
+* _0:1_ # The power strip on bus 0, device 1
 
 Each strip has 3 controllable sockets, numbered 1-3. A socket is
 identified by the strip ID followed by a colon and the socket number.
 
-    0:1:2 # Socket 2 on power strip 0:1
+* _0:1:2_ # Socket 2 on power strip 0:1
 
-* Get the list of connected strips and status
+## Get the list of connected strips and status
 
     powerusb [--list-strips]
 
