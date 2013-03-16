@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import sys
 import argparse
 import re
 import lxml.etree as etree
@@ -84,8 +84,8 @@ def parse_socket(socket_string):
 if __name__ == "__main__":
 
     opt = parse_arguments()
-
-    if opt.list_strips or opt.list_strips == False and opt.action == None:
+    
+    if len(sys.argv) == 1 or opt.list_strips:
         if opt.format == "text":
             for strip in PowerUSBStrip.strips():
                 strip.open()
