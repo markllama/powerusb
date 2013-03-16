@@ -39,3 +39,4 @@ nosetests.xml
 
 # distutils setup
 MANIFEST
+deb_dist
