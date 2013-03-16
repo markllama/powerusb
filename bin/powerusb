@@ -85,9 +85,7 @@ if __name__ == "__main__":
 
     opt = parse_arguments()
 
-    print opt
-
-    if opt.list_strips:
+    if opt.list_strips or opt.list_strips == False and opt.action == None:
         if opt.format == "text":
             for strip in PowerUSBStrip.strips():
                 strip.open()
