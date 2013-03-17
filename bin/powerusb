@@ -29,12 +29,11 @@ from powerusb import *
 """
 pwrusb --list-strips
 
-pwrusb --strip <id> [on|off|reset|status|current|power|clear]
+pwrusb <id> [on|off|reset|status|current|power|clear]
 
-pwrusb --socket <id> [[--default] [(on|off)]]
+pwrusb <id> [[--default] [(on|off)]]
 
 """
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -45,8 +44,8 @@ def parse_arguments():
     target = parser.add_mutually_exclusive_group()
 
     target.add_argument("--list-strips", action="store_true")
-    target.add_argument("--strip", default=None, dest="strip")
-    target.add_argument("--socket", default=None)
+    #target.add_argument("--strip", default=None, dest="strip")
+    #target.add_argument("--socket", default=None)
 
     format = parser.add_mutually_exclusive_group()
     format.add_argument("--format", choices=['json', 'text', 'xml'], 
@@ -59,21 +58,15 @@ def parse_arguments():
                         action="store_const", dest="format")
 
     parser.add_argument("--default", action="store_true")
+    parser.add_argument("socket", nargs="?")
     parser.add_argument("action", nargs="?", choices=['on', 'off'])
 
     return parser.parse_args()
 
-def find_strip(bus, device):
-    for strip in PowerUSBStrip.strips():
-        if strip.busnum == bus and strip.devnum == device:
-            return strip
-
-    return None
-
 bus_re = re.compile("(\d+):(\d+)(:(\d+))?")
 
 def parse_socket(socket_string):
-    
+    """Split a strip/socket ID string into components: bus, device, socket"""
     m = bus_re.match(socket_string)
     if m == None:
         raise ValueError("invalid bus/socket string: %s" % socket_string)
@@ -81,36 +74,68 @@ def parse_socket(socket_string):
     # return the bus and device number.  Socket number is optional
     return (int(m.group(1)), int(m.group(2)), m.group(4) and int(m.group(4)))
 
+
+def find_strip(bus, device):
+    """Return a power strip at the requiested bus and device"""
+    for strip in PowerUSBStrip.strips():
+        if strip.busnum == bus and strip.devnum == device:
+            return strip
+
+    return None
+
+def print_strip_status(format):
+    """Find all power strips and print status from each one"""
+
+    if format == "text":
+        for strip in PowerUSBStrip.strips():
+            strip.open()
+            print strip
+            strip.close()
+    elif format == "xml":
+        estrips = etree.Element("powerstrips")
+        doc = etree.ElementTree(element=estrips)
+        for strip in PowerUSBStrip.strips():
+            strip.open()
+            estrips.append(strip.etree())
+            strip.close()
+        print etree.tostring(doc, pretty_print=True)
+    elif format == "json":
+        print "JSON output not implemented"
+    elif format == "syslog":
+        print "logging not implemented"
+
+def strip_command(strip, action, format):
+    print "execute strip command"
+
+def socket_command(strip, socket, action, format):
+    print "execute socket command"
+
 if __name__ == "__main__":
 
     opt = parse_arguments()
     
     if len(sys.argv) == 1 or opt.list_strips:
-        if opt.format == "text":
-            for strip in PowerUSBStrip.strips():
-                strip.open()
-                print strip
-                strip.close()
-        elif opt.format == "xml":
-            estrips = etree.Element("powerstrips")
-            doc = etree.ElementTree(element=estrips)
-            for strip in PowerUSBStrip.strips():
-                strip.open()
-                estrips.append(strip.etree())
-                strip.close()
-            print etree.tostring(doc, pretty_print=True)
-
-    elif opt.strip != None:
-        print "query or set power strip %s" % opt.strip
+        print_strip_status(opt.format)
+    
+    elif opt.socket != None:
+        print "query or set power socket %s" % opt.socket
 
         # find the strip object
-        strip_id = parse_socket(opt.strip)
-        print "strip_id = %s" % str(strip_id[0:2])
+        socket_id = parse_socket(opt.socket)
+        print "socket_id = %s" % str(socket_id[0:2])
 
-        strip = find_strip(strip_id[0], strip_id[1])
+        strip = find_strip(socket_id[0], socket_id[1])
         if strip == None:
-            print("no such strip device: %s" % opt.strip)
+            print("no such device: %s:%s" % (socket_id[0], socket_id[1]))
             exit(1)
+
+        if socket_id[2] == None:
+            # strip action
+            print "strip action"
+
+        else:
+            # socket action
+            print "socket action"
 
         if opt.action == None:
             """status"""
@@ -118,27 +143,4 @@ if __name__ == "__main__":
         elif opt.action in ['on', 'off']:
             """turn power on or off"""
 
-    elif opt.socket != None:
-        print "query or set power socket %s" % opt.socket
-
-        socket_id = parse_socket(opt.socket)
-        print "socket_id = %s" % str(socket_id)
-
-        strip = find_strip(socket_id[0], socket_id[1])
-        if strip == None:
-            print("no such strip device: %s" % opt.socket)
-            exit(1)
-
-        # find the strip object
-
-        if opt.action == None:
-            """Status"""
-	    strip.open()
-            print "strip %d:%d socket %d: %s" % \
-	       tuple(socket_id + (strip.socket[int(socket_id[2])].power,))
-            strip.close()
-
-        elif opt.action in ['on', 'off']:
-            """ turn the socket on or off"""
-            print "turn strip %d:%d socket %d %s " % tuple(socket_id + (opt.action,))
 
