@@ -115,13 +115,16 @@ def strip_command(strip, action, format):
         # print status
         pass
 
-def socket_command(strip, socket, action, format):
+def socket_command(strip, socnum, action, format):
 
     print "execute socket command %s" % action
 
     if action == None or action == "status":
         # print status
         pass
+
+    elif action in ['on', 'off']:
+        strip.socnum.power(action)
 
 
 if __name__ == "__main__":
