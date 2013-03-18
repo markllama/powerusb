@@ -135,15 +135,12 @@ if __name__ == "__main__":
         if socket_id[2] == None:
             # strip action
             print "strip action"
+            strip_action(strip, opt.action, opt.format)
 
         else:
             # socket action
             print "socket action"
+            socket_action(strip, socket, opt.action, opt.format)
 
-        if opt.action == None:
-            """status"""
-
-        elif opt.action in ['on', 'off']:
-            """turn power on or off"""
 
 
