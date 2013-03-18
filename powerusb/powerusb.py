@@ -246,7 +246,7 @@ class PowerUSBStrip(object):
 
         sockets = etree.Element("sockets")
         for socket_number in range(1,4):
-            sockets.append(self.socket[socket_number].etree())
+            sockets.append(self.socket[socket_number].xml())
 
         return strip
 
