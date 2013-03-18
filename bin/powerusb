@@ -99,7 +99,7 @@ def print_strip_status(format):
         doc = etree.ElementTree(element=estrips)
         for strip in PowerUSBStrip.strips():
             strip.open()
-            estrips.append(strip.etree())
+            estrips.append(strip.xml())
             strip.close()
         print etree.tostring(doc, pretty_print=True)
     elif format == "json":
