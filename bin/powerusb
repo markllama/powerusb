@@ -121,7 +121,7 @@ def strip_command(strip, action, format):
 def socket_command(strip, socnum, action, format):
 
     if action == None or action == "status":
-        socket_status(strip.sockets[socnum], format)
+        socket_status(strip.socket[socnum], format)
 
     elif action in ['on', 'off']:
         strip.open()
