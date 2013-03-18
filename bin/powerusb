@@ -74,6 +74,9 @@ def parse_socket(socket_string):
     busnum = int(m.group(1))
     devnum = int(m.group(2))
     socnum = m.group(4) and int(m.group(4))
+
+    if not socnum in (1, 2, 3):
+        raise ValueError("invalid socket number: %d" % socnum)
     
     # return the bus and device number.  Socket number is optional
     return (busnum, devnum, socnum)
