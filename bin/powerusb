@@ -121,14 +121,18 @@ def strip_command(strip, action, format):
 def socket_command(strip, socnum, action, format):
 
     if action == None or action == "status":
-        strip.open()
-        print strip.socket[socnum].power
-        strip.close()
+        socket_status(strip.sockets[socnum], format)
 
     elif action in ['on', 'off']:
         strip.open()
         strip.socket[socnum].power = action
         strip.close()
+
+def socket_status(socket, format):
+        socket.strip.open()
+        print socket.power
+        socket.strip.close()
+
 
 
 if __name__ == "__main__":
