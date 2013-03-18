@@ -269,6 +269,14 @@ class PowerUSBSocket(object):
         self._socket_num = socket_num
 
     @property
+    def strip(self):
+        return self._strip
+
+    @property
+    def socket_num(self):
+        return self.socket_num
+
+    @property
     def power(self):
         """Retrieve and return the power state of the socket"""
         self._strip.write(PowerUSBSocket._state_cmd[self._socket_num - 1])
