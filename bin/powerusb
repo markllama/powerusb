@@ -124,7 +124,9 @@ def socket_command(strip, socnum, action, format):
         pass
 
     elif action in ['on', 'off']:
+        strip.open()
         strip.socket[socnum].power(action)
+        strip.close()
 
 
 if __name__ == "__main__":
