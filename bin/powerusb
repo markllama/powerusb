@@ -129,10 +129,15 @@ def socket_command(strip, socnum, action, format):
         strip.close()
 
 def socket_status(socket, format):
+    if format == "text":
         socket.strip.open()
         print socket.power
         socket.strip.close()
 
+    elif format == "xml":
+        socket.strip.open()
+        print etree.tostring(socket.xml(), pretty_print=True)
+        socket.strip.close()
 
 
 if __name__ == "__main__":
