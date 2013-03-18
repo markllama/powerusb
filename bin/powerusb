@@ -92,8 +92,6 @@ def find_strip(bus, device):
 def print_strip_status(format):
     """Find all power strips and print status from each one"""
 
-    print "format = %s" % format
-
     if format == "text":
         for strip in PowerUSBStrip.strips():
             strip.open()
