@@ -125,7 +125,7 @@ def socket_command(strip, socnum, action, format):
 
     elif action in ['on', 'off']:
         strip.open()
-        strip.socket[socnum].power(action)
+        strip.socket[socnum].power = action
         strip.close()
 
 
