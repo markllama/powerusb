@@ -124,15 +124,15 @@ if __name__ == "__main__":
         print "query or set power socket %s" % opt.socket
 
         # find the strip object
-        socket_id = parse_socket(opt.socket)
-        print "socket_id = %s" % str(socket_id[0:2])
+        busnum, devnum, socnum = parse_socket(opt.socket)
+        print "socket_id = %s:%s" % (busnum, devnum)
 
-        strip = find_strip(socket_id[0], socket_id[1])
+        strip = find_strip(busnum, devnum)
         if strip == None:
-            print("no such device: %s:%s" % (socket_id[0], socket_id[1]))
+            print("no such device: %s:%s" % (busnum, devnum)
             exit(1)
 
-        if socket_id[2] == None:
+        if socnum == None:
             # strip action
             print "strip action"
             strip_command(strip, opt.action, opt.format)
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         else:
             # socket action
             print "socket action"
-            socket_command(strip, socket, opt.action, opt.format)
+            socket_command(strip, socnum, opt.action, opt.format)
 
 
 
