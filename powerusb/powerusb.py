@@ -247,6 +247,7 @@ class PowerUSBStrip(object):
         sockets = etree.Element("sockets")
         for socket_number in range(1,4):
             sockets.append(self.socket[socket_number].xml())
+        strip.append(sockets)
 
         return strip
 
@@ -330,13 +331,6 @@ def strip_status(format):
             strip.close()
 
     elif format == "xml":
-        #stripxml = xml.Element("powerstrips")
-        #for i in range(0, len(strips)):
-        #    strip = strips[i]
-        #    strip.open()
-        #    stripxml.appendChild(strip.xml())
-        #    strip.close()
-        #print stripxml.toprettyxml(indent="  ")
         
         stripxml = etree.Element("powerstrips")
         for i in range(0, len(strips)):
