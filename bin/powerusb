@@ -122,8 +122,6 @@ def strip_command(strip, action, format):
 
 def socket_command(strip, socnum, action, format):
 
-    print "execute socket command %s" % action
-
     if action == None or action == "status":
         strip.open()
         print strip.socket[socnum].power
@@ -143,25 +141,20 @@ if __name__ == "__main__":
         print_strip_status(opt.format)
     
     elif opt.socket != None:
-        print "query or set power socket %s" % opt.socket
-
         # find the strip object
         busnum, devnum, socnum = parse_socket(opt.socket)
-        print "socket_id = %s:%s" % (busnum, devnum)
-
         strip = find_strip(busnum, devnum)
+
         if strip == None:
             print "no such device: %s:%s" % (busnum, devnum)
             exit(1)
 
         if socnum == None:
             # strip action
-            print "strip action"
             strip_command(strip, opt.action, opt.format)
 
         else:
             # socket action
-            print "socket action"
             socket_command(strip, socnum, opt.action, opt.format)
 
 
