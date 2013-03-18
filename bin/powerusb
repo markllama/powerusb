@@ -44,8 +44,6 @@ def parse_arguments():
     target = parser.add_mutually_exclusive_group()
 
     target.add_argument("--list-strips", action="store_true")
-    #target.add_argument("--strip", default=None, dest="strip")
-    #target.add_argument("--socket", default=None)
 
     format = parser.add_mutually_exclusive_group()
     format.add_argument("--format", choices=['json', 'text', 'xml', "syslog"], 
@@ -65,7 +63,7 @@ def parse_arguments():
 
     return parser.parse_args()
 
-bus_re = re.compile("(\d+):(\d+)(:(\d+))?")
+bus_re = re.compile("^(\d+):(\d+)(:(\d+))?$")
 
 def parse_socket(socket_string):
     """Split a strip/socket ID string into components: bus, device, socket"""
@@ -73,8 +71,12 @@ def parse_socket(socket_string):
     if m == None:
         raise ValueError("invalid bus/socket string: %s" % socket_string)
 
+    busnum = int(m.group(1))
+    devnum = int(m.group(2))
+    socnum = m.group(4) and int(m.group(4))
+    
     # return the bus and device number.  Socket number is optional
-    return (int(m.group(1)), int(m.group(2)), m.group(4) and int(m.group(4)))
+    return (busnum, devnum, socnum)
 
 def find_strip(bus, device):
     """Return a power strip at the requiested bus and device"""
@@ -124,6 +126,7 @@ def socket_command(strip, socnum, action, format):
         pass
 
     elif action in ['on', 'off']:
+        
         strip.open()
         strip.socket[socnum].power = action
         strip.close()
