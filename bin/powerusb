@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
         strip = find_strip(busnum, devnum)
         if strip == None:
-            print("no such device: %s:%s" % (busnum, devnum)
+            print "no such device: %s:%s" % (busnum, devnum)
             exit(1)
 
         if socnum == None:
