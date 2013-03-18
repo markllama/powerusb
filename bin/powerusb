@@ -59,7 +59,7 @@ def parse_arguments():
 
     parser.add_argument("--default", action="store_true")
     parser.add_argument("socket", nargs="?")
-    parser.add_argument("action", nargs="?", choices=['on', 'off'])
+    parser.add_argument("action", nargs="?", choices=['status', 'on', 'off'])
 
     return parser.parse_args()
 
