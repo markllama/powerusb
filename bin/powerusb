@@ -108,10 +108,21 @@ def print_strip_status(format):
         print "logging not implemented"
 
 def strip_command(strip, action, format):
-    print "execute strip command"
+
+    print "execute strip command %s" % action
+
+    if action == None or action == "status":
+        # print status
+        pass
 
 def socket_command(strip, socket, action, format):
-    print "execute socket command"
+
+    print "execute socket command %s" % action
+
+    if action == None or action == "status":
+        # print status
+        pass
+
 
 if __name__ == "__main__":
 
