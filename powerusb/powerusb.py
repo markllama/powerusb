@@ -229,54 +229,6 @@ class PowerUSBStrip(object):
             )
 
     def xml(self):
-        """
-        <?xml?>
-        <powerstrips xmlns="">
-          <powerstrip model="basic" firmware="3.1">
-            <current>150.0</current>
-            <power>2.96</power>
-            <sockets>
-              <socket number="1">
-                <power>[on|off]</power>
-                <default>[on|off]</power>
-              </socket>
-              <socket number="2">
-                <power>[on|off]</power>
-                <default>[on|off]</power>
-              </socket>
-              <socket number="2">
-                <power>[on|off]</power>
-                <default>[on|off]</power>
-              </socket>
-            </sockets>
-        </powerstrips>
-        """
-
-        strip = xml.Element("powerstrip")
-        strip.setAttribute("model", str(self.model))
-        strip.setAttribute("fw_version", str(self.firmware_version))
-        strip.setAttribute("busnum", str(self.busnum))
-        strip.setAttribute("devnum", str(self.devnum))
-
-        current = xml.Element("current")
-        curtext = xml.Text()
-        curtext.replaceWholeText(self.current)
-        current.appendChild(curtext)
-        strip.appendChild(current)
-
-        power = xml.Element("power")
-        pwrtext = xml.Text()
-        pwrtext.replaceWholeText(self.power)
-        power.appendChild(pwrtext)
-        strip.appendChild(power)
-        sockets = xml.Element("sockets")
-        for socket_number in range(1,4):
-            sockets.appendChild(self.socket[socket_number].etree())
-        strip.appendChild(sockets)
-            
-        return strip
-        
-    def etree(self):
 
         strip = etree.Element("powerstrip")
         strip.set("model", str(self.model))
@@ -347,23 +299,6 @@ class PowerUSBSocket(object):
             self._strip.write(PowerUSBSocket._defoff_cmd[self._socket_num - 1])
 
     def xml(self):
-        socket = xml.Element("socket")
-        socket.setAttribute('number', str(self._socket_num))
-        
-        power = xml.Element("power")
-        pwrtext = xml.Text()
-        pwrtext.replaceWholeText(self.power)
-        power.appendChild(pwrtext)
-        socket.appendChild(power)
-        default = xml.Element("default")
-        deftext = xml.Text()
-        deftext.replaceWholeText(self.default)
-        default.appendChild(deftext)
-        socket.appendChild(default)
-
-        return socket
-
-    def etree(self):
         socket = etree.Element("socket")
         socket.set("number", str(self._socket_num))
 
