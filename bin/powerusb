@@ -125,11 +125,11 @@ def socket_command(strip, socnum, action, format):
     print "execute socket command %s" % action
 
     if action == None or action == "status":
-        # print status
-        pass
+        strip.open()
+        print strip.socket[socnum].power
+        strip.close()
 
     elif action in ['on', 'off']:
-        
         strip.open()
         strip.socket[socnum].power = action
         strip.close()
