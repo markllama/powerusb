@@ -342,7 +342,7 @@ def strip_status(format):
         for i in range(0, len(strips)):
             strip = strips[i]
             strip.open()
-            stripxml.append(strip.etree())
+            stripxml.append(strip.xml())
             strip.close()
 
         etree.dump(stripxml, pretty_print=True)
