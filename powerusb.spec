@@ -36,7 +36,6 @@ rm -rf $RPM_BUILD_ROOT
 %post
 # Create a group which will be given permission to manage the strips
 groupadd --system powerusb
-%end
 
 %postun
 # remove the powerusb management group
