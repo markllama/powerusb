@@ -27,9 +27,21 @@ python setup.py build
 
 %install
 python setup.py install -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+cp 99-powerusb.rules $RPM_BUILD_ROOT/lib/udev/rules.d
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%post
+# Create a group which will be given permission to manage the strips
+groupadd --system powerusb
+%end
+
+%postun
+# remove the powerusb management group
+groupdel powerusb
+%end
+
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
+/lib/udev/99-powerusb.rules

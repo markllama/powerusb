@@ -27,6 +27,7 @@
 ###############################################################################
 import time
 import lxml.etree as etree
+import json
 import hidapi
 
 class PowerUSBStrip(object):
@@ -87,7 +88,7 @@ class PowerUSBStrip(object):
     
     _sleep_duration = 0.020 # seconds
 
-    def __init__(self, hid_device):
+    def __init__(self, hid_device=None):
         self.hid_device = hid_device
         self.socket = [None]
         for socket_num in range(1,4):
