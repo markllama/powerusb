@@ -37,11 +37,6 @@ rm -rf $RPM_BUILD_ROOT
 # Create a group which will be given permission to manage the strips
 groupadd --system powerusb
 
-%postun
-# remove the powerusb management group
-groupdel powerusb
-%end
-
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
 /lib/udev/rules.d/99-powerusb.rules
