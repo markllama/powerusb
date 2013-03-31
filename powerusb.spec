@@ -27,6 +27,7 @@ python setup.py build
 
 %install
 python setup.py install -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+mkdir -p $RPM_BUILD_ROOT/lib/udev/rules.d
 cp 99-powerusb.rules $RPM_BUILD_ROOT/lib/udev/rules.d
 
 %clean
@@ -44,4 +45,4 @@ groupdel powerusb
 
 %files -f INSTALLED_FILES
 %defattr(-,root,root)
-/lib/udev/99-powerusb.rules
+/lib/udev/rules.d/99-powerusb.rules
