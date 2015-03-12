@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Manage PowerUSB power strips:
 #  http://pwrusb.com
 #
 # Author: Mark Lamourine <markllama@gmail.com>
-# 
+#
 # Copyright 2013
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
