@@ -15,8 +15,8 @@ features TBD.
       url="http://github.com/markllama/powerusb",
       packages=["powerusb"],
       install_requires=["Cython",
+                        #"lxml",
                         "hidapi",
-                        "lxml",
                         "pyusb==1.0.0b2"],
       scripts=["bin/powerusb"],
       data_files=[("/lib/udev/rules.d", ["99-powerusb.rules"])]

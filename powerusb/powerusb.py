@@ -5,7 +5,7 @@
 # Adapted from PowerUSB Linux source code
 #
 # Author: Mark Lamourine <markllama@gmail.com>
-# 
+#
 # Copyright 2013
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,8 +26,10 @@
 #
 ###############################################################################
 import time
-import lxml.etree as etree
-import json
+try:
+    import lxml.etree as etree
+except:
+    print "Disabling xml output as I couldn't find lxml"
 import hidapi
 
 class PowerUSBStrip(object):
@@ -85,7 +87,7 @@ class PowerUSBStrip(object):
     _SET_DATETIME	 = chr(0x87)
     _DISP_TEXT		 = chr(0x88)
     _SET_PASS		 = chr(0x89)
-    
+
     _sleep_duration = 0.020 # seconds
 
     def __init__(self, hid_device=None):
@@ -173,7 +175,7 @@ class PowerUSBStrip(object):
     @property
     def manufacturer(self):
         return self.hid_device['manufacturer']
-    
+
     @property
     def product(self):
         return self.hid_device['product']
@@ -196,14 +198,14 @@ class PowerUSBStrip(object):
         time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         return int(inbuffer[0])
-        
+
     @overload.setter
     def overload(self, ol):
         self.write(int(ol))
         time.sleep(PowerUSBStri._sleep_duration)
 
-        
-        
+
+
 
     @staticmethod
     def strips():
@@ -215,12 +217,12 @@ class PowerUSBStrip(object):
             PowerUSBStrip._product_id
             )
         return [PowerUSBStrip(d) for d in hid_devices]
-        
+
     def __str__(self):
         return "%d:%d, %-9s, FWVer: %3s, Curr(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
             self.busnum,
             self.devnum,
-            self.model, 
+            self.model,
             self.firmware_version,
             self.current,
             self.power,
@@ -240,7 +242,7 @@ class PowerUSBStrip(object):
         current = etree.Element("current")
         current.text = str(self.current)
         strip.append(current)
-        
+
         power = etree.Element("power")
         power.text = str(self.power)
         strip.append(power)
@@ -256,10 +258,10 @@ class PowerUSBSocket(object):
 
     _on_cmd = ['A', 'C', 'E']
     _off_cmd = ['B', 'D', 'P']
-    
+
     _defon_cmd = ['N', 'G', 'O']
     _defoff_cmd = ['F', 'Q', "H"]
-    
+
     _state_cmd = [chr(0xa1), chr(0xa2), chr(0xac)]
     _defstate_cmd = [chr(0xa3), chr(0xa4), chr(0xad)]
 
@@ -330,7 +332,7 @@ class PowerUSBSocket(object):
 
 def strip_status(format):
     strips = PowerUSBStrip.strips()
-    
+
     if format == "text":
         print "%d device(s) connected" % len(strips)
         for i in range(0, len(strips)):
@@ -340,7 +342,7 @@ def strip_status(format):
             strip.close()
 
     elif format == "xml":
-        
+
         stripxml = etree.Element("powerstrips")
         for i in range(0, len(strips)):
             strip = strips[i]
@@ -350,5 +352,3 @@ def strip_status(format):
 
         etree.dump(stripxml, pretty_print=True)
         print ""
-        
-

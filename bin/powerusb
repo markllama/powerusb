@@ -21,7 +21,10 @@
 
 import argparse
 import re
-import lxml.etree as etree
+try:
+    import lxml.etree as etree
+except:
+    print "Disabling xml output as I couldn't find lxml"
 
 from powerusb import PowerUSBStrip
 
@@ -45,7 +48,7 @@ def parse_arguments():
     target.add_argument("--list-strips", action="store_true")
 
     format = parser.add_mutually_exclusive_group()
-    format.add_argument("--format", choices=['json', 'text', 'xml', "syslog"], 
+    format.add_argument("--format", choices=['json', 'text', 'xml', "syslog"],
                         default="text")
     format.add_argument("--json", const="json",
                         action="store_const", dest="format")
@@ -76,15 +79,21 @@ def parse_socket(socket_string):
 
     if not socnum in (1, 2, 3):
         raise ValueError("invalid socket number: %d" % socnum)
-    
+
     # return the bus and device number.  Socket number is optional
     return (busnum, devnum, socnum)
 
 def find_strip(bus, device):
     """Return a power strip at the requiested bus and device"""
-    for strip in PowerUSBStrip.strips():
-        if strip.busnum == bus and strip.devnum == device:
-            return strip
+
+    strips = PowerUSBStrip.strips()
+
+    if len(strips) == 1:
+        return strips[0]
+    else:
+        for strip in strips:
+            if strip.busnum == bus and strip.devnum == device:
+                return strip
 
     return None
 
@@ -142,10 +151,10 @@ def socket_status(socket, format):
 if __name__ == "__main__":
 
     opt = parse_arguments()
-    
+
     if opt.socket == None or opt.list_strips:
         print_strip_status(opt.format)
-    
+
     elif opt.socket != None:
         # find the strip object
         busnum, devnum, socnum = parse_socket(opt.socket)
@@ -162,6 +171,3 @@ if __name__ == "__main__":
         else:
             # socket action
             socket_command(strip, socnum, opt.action, opt.format)
-
-
-
