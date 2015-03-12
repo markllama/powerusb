@@ -19,12 +19,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import argparse
 import re
 import lxml.etree as etree
 
-from powerusb import *
+from powerusb import PowerUSBStrip
 
 """
 pwrusb --list-strips
