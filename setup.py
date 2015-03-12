@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(name="powerusb",
       version="1.4",
@@ -14,6 +14,10 @@ features TBD.
       license="Apache License 2.0",
       url="http://github.com/markllama/powerusb",
       packages=["powerusb"],
+      install_requires=["Cython",
+                        "hidapi",
+                        "lxml",
+                        "pyusb==1.0.0b2"],
       scripts=["bin/powerusb"],
       data_files=[("/lib/udev/rules.d", ["99-powerusb.rules"])]
       )
