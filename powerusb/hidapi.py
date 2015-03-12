@@ -68,13 +68,14 @@ def hid_enumerate(vendor_id, product_id):
 
     hid_devices = []
 
-    busses = usb.busses()
-    
+    busses = list(usb.busses())
+
     # check each bus
     for b_index in range(0, len(busses)):
         bus = busses[b_index]
+        devices = list(bus.devices)
         # check each device on a bus
-        for d_index in range(0, len(bus.devices)):
+        for d_index in range(0, len(devices)):
             device = bus.devices[d_index]
 
             # If the device matches all criteria
@@ -138,26 +139,34 @@ class HIDDevice():
 
     def open(self):
         self.dh = self.usb_device.open()
-        self.dh.claimInterface(0)
+        try:
+            self.dh.claimInterface(0)
+        except usb.core.USBError as e:
+            print "Error opening device...", e
+            if e.errno == 16: # Resource is busy:
+                self.dh.dev.is_kernel_driver_active(0)
+                self.dh.dev.detach_kernel_driver(0)
+            raise
 
     def close(self):
         self.dh.releaseInterface()
 
     def write(self, buffer):
         """Write to the interrupt output endpoint"""
+        self.open()
         try:
             self.dh.interruptWrite(
-                self.output_endpoint.address, 
+                self.output_endpoint.address,
                 buffer + chr(0xff) * (64 - len(buffer)),
                 HIDDevice._timeout
                 )
-        except usb.USBError():
+        except usb.USBError:
             raise
 
     def read(self, size):
-        
+
         try:
-            outstring = self.dh.interruptRead(self.input_endpoint.address, 
+            outstring = self.dh.interruptRead(self.input_endpoint.address,
                                               64, HIDDevice._timeout)
         except usb.USBError(e):
             pass
