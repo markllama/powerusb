@@ -1,22 +1,22 @@
 #
-# hidapi 
+# hidapi
 #   adapted and partially ported to Python by
 #   Mark Lamourine <markllama@gmai.com>
-# 
+#
 # Originally from:
 #/*******************************************************
 # HIDAPI - Multi-Platform library for
 # communication with HID devices.
 #
 # Alan Ott
-# Signal 11 Software 
+# Signal 11 Software
 #
 # 8/22/2009
 # Linux Version - 6/2/2010
 # Libusb Version - 8/13/2010
 #
 # Copyright 2009, All Rights Reserved.
-# 
+#
 # At the discretion of the user of this library,
 # this software may be licensed under the terms of the
 # GNU Public License v3, a BSD-Style license, or the
@@ -69,7 +69,7 @@ def hid_enumerate(vendor_id, product_id):
     hid_devices = []
 
     busses = usb.busses()
-    
+
     # check each bus
     for b_index in range(0, len(busses)):
         bus = busses[b_index]
@@ -90,7 +90,7 @@ def hid_enumerate(vendor_id, product_id):
                                     HIDDevice(device, b_index, d_index))
 
     return hid_devices
-                                                   
+
 
 class HIDDevice():
 
@@ -102,7 +102,7 @@ class HIDDevice():
         self.blocking = True
         self.busnum = bus_index
         self.devnum = device_index
-        
+
     @property
     def configuration(self):
         return self.usb_device.configurations[0]
@@ -110,7 +110,7 @@ class HIDDevice():
     @property
     def interface(self):
         """Find the HID interface"""
-        
+
         for ilist in self.configuration.interfaces:
             for interface in ilist:
                 if interface.interfaceClass == USB_CLASS_HID:
@@ -147,7 +147,7 @@ class HIDDevice():
         """Write to the interrupt output endpoint"""
         try:
             self.dh.interruptWrite(
-                self.output_endpoint.address, 
+                self.output_endpoint.address,
                 buffer + chr(0xff) * (64 - len(buffer)),
                 HIDDevice._timeout
                 )
@@ -155,9 +155,9 @@ class HIDDevice():
             raise
 
     def read(self, size):
-        
+
         try:
-            outstring = self.dh.interruptRead(self.input_endpoint.address, 
+            outstring = self.dh.interruptRead(self.input_endpoint.address,
                                               64, HIDDevice._timeout)
         except usb.USBError(e):
             pass
@@ -168,9 +168,9 @@ class HIDDevice():
     def devices(vendor_id=None, product_id=None):
         usb_devices = [d for b in usb.busses() for d in b.devices
                        if d.deviceClass == USB_CLASS_PER_INTERFACE
-                       and d.idVendor == vendor_id 
+                       and d.idVendor == vendor_id
                        and d.idProduct == product_id]
 
         return [HIDDevice(u) for u in usb_devices]
-        
+
 
