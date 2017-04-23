@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name="powerusb",
-      version="1.4",
+      version="1.5",
       description="Control PowerUSB power strips",
       long_description="""
 Library and CLI tools to Control PowerUSB power strips.
@@ -14,10 +14,10 @@ features TBD.
       license="Apache License 2.0",
       url="http://github.com/markllama/powerusb",
       packages=["powerusb"],
-      install_requires=["Cython",
-                        "lxml"
-                        "hidapi",
-                        "pyusb"],
+#      install_requires=["Cython",
+#                        "lxml"
+#                        "hidapi",
+#                        "pyusb"],
       scripts=["bin/powerusb"],
       data_files=[("/lib/udev/rules.d", ["99-powerusb.rules"])]
       )

@@ -1,6 +1,6 @@
 Summary: Control PowerUSB power strips
-Name: powerusb
-Version: 1.4
+Name: python-powerusb
+Version: 1.5
 Release: 1
 Source0: %{name}-%{version}.tar.gz
 License: Apache License 2.0
