@@ -73,7 +73,7 @@ def hid_enumerate(vendor_id, product_id):
     # check each bus
     for b_index in range(0, len(busses)):
         bus = busses[b_index]
-        device = list(bus.devices)
+        devices = list(bus.devices)
         # check each device on a bus
         for d_index in range(0, len(devices)):
             device = devices[d_index]
