@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # Manage PowerUSB power strips:
 #  http://pwrusb.com
 #
 # Author: Mark Lamourine <markllama@gmail.com>
-# 
+#
 # Copyright 2013
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@ import argparse
 import re
 import lxml.etree as etree
 
-from powerusb import *
+from powerusb import PowerUSBStrip
 
 """
 pwrusb --list-strips
@@ -77,7 +77,7 @@ def parse_socket(socket_string):
 
     if not socnum in (1, 2, 3):
         raise ValueError("invalid socket number: %d" % socnum)
-    
+
     # return the bus and device number.  Socket number is optional
     return (busnum, devnum, socnum)
 
@@ -139,14 +139,13 @@ def socket_status(socket, format):
         print etree.tostring(socket.xml(), pretty_print=True)
         socket.strip.close()
 
-
 if __name__ == "__main__":
 
     opt = parse_arguments()
-    
+
     if opt.socket == None or opt.list_strips:
         print_strip_status(opt.format)
-    
+
     elif opt.socket != None:
         # find the strip object
         busnum, devnum, socnum = parse_socket(opt.socket)
@@ -163,6 +162,3 @@ if __name__ == "__main__":
         else:
             # socket action
             socket_command(strip, socnum, opt.action, opt.format)
-
-
-
