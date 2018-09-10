@@ -69,11 +69,16 @@ def parse_socket(socket_string):
     """Split a strip/socket ID string into components: bus, device, socket"""
     m = bus_re.match(socket_string)
     if m == None:
-        raise ValueError("invalid bus/socket string: %s" % socket_string)
-
-    busnum = int(m.group(1))
-    devnum = int(m.group(2))
-    socnum = m.group(4) and int(m.group(4))
+        strips = PowerUSBStrip.strips()
+        if (len(strips) != 1):
+            raise ValueError("invalid bus/socket string: %s" % socket_string)
+        busnum = strips[0].busnum
+        devnum = strips[0].devnum
+        socnum = socket_string and int(socket_string)
+    else:
+        busnum = int(m.group(1))
+        devnum = int(m.group(2))
+        socnum = m.group(4) and int(m.group(4))
 
     if not socnum in (1, 2, 3):
         raise ValueError("invalid socket number: %d" % socnum)
