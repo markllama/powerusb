@@ -139,6 +139,12 @@ class HIDDevice():
 
     def open(self):
         self.dh = self.usb_device.open()
+
+        try:
+            self.dh.detachKernelDriver(0)
+        except:
+            pass
+
         try:
             self.dh.claimInterface(0)
         except usb.core.USBError as e:

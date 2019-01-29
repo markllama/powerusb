@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name="powerusb",
-      version="1.5",
+      version="1.6",
       description="Control PowerUSB power strips",
       long_description="""
 Library and CLI tools to Control PowerUSB power strips.
