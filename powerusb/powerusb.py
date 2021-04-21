@@ -30,7 +30,7 @@ from __future__ import print_function
 import time
 import lxml.etree as etree
 import json
-import hidapi
+import powerusb.hidapi as hidapi
 
 class PowerUSBStrip(object):
 

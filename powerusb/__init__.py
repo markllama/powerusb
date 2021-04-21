@@ -1,4 +1,4 @@
 #
 # powerusb module
 #
-from powerusb import *
+from .powerusb import *
