@@ -148,7 +148,7 @@ class HIDDevice():
         try:
             self.dh.claimInterface(0)
         except usb.core.USBError as e:
-            print "Error opening device...", e
+            print("Error opening device...", e)
             if e.errno == 16: # Resource is busy:
                 self.dh.dev.is_kernel_driver_active(0)
                 self.dh.dev.detach_kernel_driver(0)

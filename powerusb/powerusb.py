@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+from __future__ import print_function
 #
 # Manage PowerUSB power strips.
 #  http://pwrusb.com
@@ -332,11 +334,11 @@ def strip_status(format):
     strips = PowerUSBStrip.strips()
     
     if format == "text":
-        print "%d device(s) connected" % len(strips)
+        print("%d device(s) connected" % len(strips))
         for i in range(0, len(strips)):
             strip = strips[i]
             strip.open()
-            print "%d) %s" % (i, strip)
+            print("%d) %s" % (i, strip))
             strip.close()
 
     elif format == "xml":
@@ -349,6 +351,6 @@ def strip_status(format):
             strip.close()
 
         etree.dump(stripxml, pretty_print=True)
-        print ""
+        print()
         
 
