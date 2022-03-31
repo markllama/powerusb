@@ -30,7 +30,8 @@ from __future__ import print_function
 import time
 import lxml.etree as etree
 import json
-import powerusb.hidapi as hidapi
+#import powerusb.hidapi as hidapi
+import hid
 
 class PowerUSBStrip(object):
 
@@ -41,90 +42,103 @@ class PowerUSBStrip(object):
 
     _power_state = ["off", "on"]
 
-    _READ_FIRMWARE_VER	 = chr(0xa7)
-    _READ_MODEL		 = chr(0xaa)
+    _READ_FIRMWARE_VER	 = b'\xa7'
+    _READ_MODEL		 = b'\xaa'
 
-    _READ_CURRENT	 = chr(0xb1)
-    _READ_CURRENT_CUM	 = chr(0xb2)
-    _RESET_CURRENT_COUNT = chr(0xb3)
-    _WRITE_OVERLOAD      = chr(0xb4)
-    _READ_OVERLOAD	 = chr(0xb5)
-    _SET_CURRENT_RATIO	 = chr(0xb6)
-    _RESET_BOARD	 = chr(0xc1)
-    _SET_CURRENT_OFFSET	 = chr(0xc2)
+    _READ_CURRENT	 = b'\xb1'
+    _READ_CURRENT_CUM	 = b'\xb2'
+    _RESET_CURRENT_COUNT = b'\xb3'
+    _WRITE_OVERLOAD      = b'\xb4'
+    _READ_OVERLOAD	 = b'\xb5'
+    _SET_CURRENT_RATIO	 = b'\xb6'
+    _RESET_BOARD	 = b'\xc1'
+    _SET_CURRENT_OFFSET	 = b'\xc2'
 
-    _ALL_PORT_ON	 = chr(0xa5)
-    _ALL_PORT_OFF	 = chr(0xa6)
-    _SET_MODE		 = chr(0xa8)
-    _READ_MODE           = chr(0xa9)
+    _ALL_PORT_ON	 = b'\xa5'
+    _ALL_PORT_OFF	 = b'\xa6'
+    _SET_MODE		 = b'\xa8'
+    _READ_MODE           = b'\xa9'
 
     # Digital IO
-    _SET_IO_DIRECTION	 = chr(0xd1)
-    _SET_IO_OUTPUT	 = chr(0xd3)
-    _GET_IO_INPUT	 = chr(0xd4)
-    _SET_IO_CLOCK        = chr(0xd5)
-    _GET_IO_OUTPUT	 = chr(0xd6)
-    _SET_IO_TRIGGER	 = chr(0xd7)
-    _SET_IO_SETPLC	 = chr(0xd8)
-    _SET_IO_GETPLC	 = chr(0xd9)
-    _SET_IO_CLRPLC	 = chr(0xda)
+    _SET_IO_DIRECTION	 = b'\xd1'
+    _SET_IO_OUTPUT	 = b'\xd3'
+    _GET_IO_INPUT	 = b'\xd4'
+    _SET_IO_CLOCK        = b'\xd5'
+    _GET_IO_OUTPUT	 = b'\xd6'
+    _SET_IO_TRIGGER	 = b'\xd7'
+    _SET_IO_SETPLC	 = b'\xd8'
+    _SET_IO_GETPLC	 = b'\xd9'
+    _SET_IO_CLRPLC	 = b'\xda'
 
     # Watchdog
-    _START_WDT		 = chr(0x90)
-    _STOP_WDT		 = chr(0x91)
-    _POWER_CYCLE	 = chr(0x92)
-    _READ_WDT 		 = chr(0x93)	# retrun the all status.
-    _HEART_BEAT		 = chr(0x94)
-    _SHUTDOWN_OFFON	 = chr(0x95)
+    _START_WDT		 = b'\x90'
+    _STOP_WDT		 = b'\x91'
+    _POWER_CYCLE	 = b'\x92'
+    _READ_WDT 		 = b'\x93'	# retrun the all status.
+    _HEART_BEAT		 = b'\x94'
+    _SHUTDOWN_OFFON	 = b'\x95'
 
     # SMART
-    _SET_ONOFF		 = chr(0x81)
-    _GET_ONOFF		 = chr(0x82)
-    _SET_FREQ		 = chr(0x83)
-    _SET_ONOFFMODE	 = chr(0x84)
-    _SET_MODE_SMART	 = chr(0x85)
-    _SET_TVLIMIT	 = chr(0x86)
-    _SET_DATETIME	 = chr(0x87)
-    _DISP_TEXT		 = chr(0x88)
-    _SET_PASS		 = chr(0x89)
+    _SET_ONOFF		 = b'\x81'
+    _GET_ONOFF		 = b'\x82'
+    _SET_FREQ		 = b'\x83'
+    _SET_ONOFFMODE	 = b'\x84'
+    _SET_MODE_SMART	 = b'\x85'
+    _SET_TVLIMIT	 = b'\x86'
+    _SET_DATETIME	 = b'\x87'
+    _DISP_TEXT		 = b'\x88'
+    _SET_PASS		 = b'\x89'
     
     _sleep_duration = 0.020 # seconds
+    _read_timeout = 100 # milliseconds
 
-    def __init__(self, hid_device=None):
-        self.hid_device = hid_device
+    _instance_variables = [
+        'path', 'vendor_id', 'product_id', 'serial_number', 'release_number',
+        'manfuracturer_string', 'product_string', 'usage_page', 'usage', 'interface_number'
+        ]
+    
+    def __init__(self, **kwargs):
+        # Parse kwargs into instance variables
+        #
+        # ['
+        for ivname in PowerUSBStrip._instance_variables:
+            self.__dict__['_' + ivname] = kwargs[ivname] if ivname in kwargs else None
+        self._device = hid.device(self._path)
         self.socket = [None]
         for socket_num in range(1,4):
             self.socket.append(PowerUSBSocket(self, socket_num))
 
     @property
     def device(self):
-        return self.hid_device
+        return self._device
 
     @property
     def busnum(self):
-        return self.hid_device.busnum
+        #return self._device.busnum
+        return 1
 
     @property
     def devnum(self):
-        return self.hid_device.devnum
+        #return self.hid_device.devnum
+        return 1
 
     def open(self):
-        self.hid_device.open()
+        self._device.open_path(self._path)
 
     def close(self):
-        self.hid_device.close()
+        self._device.close()
 
     def read(self):
-        instr = self.hid_device.read(64)
+        instr = self._device.read(64, PowerUSBStrip._read_timeout)
         return instr
 
     def write(self, outstr):
-        self.hid_device.write(outstr + chr(0xff) * (64 - len(outstr)))
+        self._device.write(outstr + (b'\xff' * 63))
 
     @property
     def model(self):
         self.write(PowerUSBStrip._READ_MODEL)
-        time.sleep(PowerUSBStrip._sleep_duration)
+#        time.sleep(PowerUSBStrip._sleep_duration)
         inbuffer = self.read()
         return PowerUSBStrip._model[inbuffer[0]]
 
@@ -174,11 +188,11 @@ class PowerUSBStrip(object):
 
     @property
     def manufacturer(self):
-        return self.hid_device['manufacturer']
+        return self._device.get_manufacturer_string()
     
     @property
     def product(self):
-        return self.hid_device['product']
+        return self._device.get_product_string()
 
     def all_on(self):
         self.write(PowerUSBStrip._ALL_PORT_ON)
@@ -204,19 +218,18 @@ class PowerUSBStrip(object):
         self.write(int(ol))
         time.sleep(PowerUSBStri._sleep_duration)
 
-        
-        
+
 
     @staticmethod
     def strips():
         """
         Return the set of connected power strips
         """
-        hid_devices = hidapi.hid_enumerate(
+        hid_devices = hid.enumerate(
             PowerUSBStrip._vendor_id,
             PowerUSBStrip._product_id
             )
-        return [PowerUSBStrip(d) for d in hid_devices]
+        return [PowerUSBStrip(**d) for d in hid_devices]
         
     def __str__(self):
         return "%d:%d, %-9s, FWVer: %3s, Curr(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
@@ -256,14 +269,14 @@ class PowerUSBStrip(object):
 
 class PowerUSBSocket(object):
 
-    _on_cmd = ['A', 'C', 'E']
-    _off_cmd = ['B', 'D', 'P']
+    _on_cmd = [b'A', b'C', b'E']
+    _off_cmd = [b'B', b'D', b'P']
     
-    _defon_cmd = ['N', 'G', 'O']
-    _defoff_cmd = ['F', 'Q', "H"]
+    _defon_cmd = [b'N', b'G', b'O']
+    _defoff_cmd = [b'F', b'Q', b'H']
     
-    _state_cmd = [chr(0xa1), chr(0xa2), chr(0xac)]
-    _defstate_cmd = [chr(0xa3), chr(0xa4), chr(0xad)]
+    _state_cmd = [b'\xa1', b'\xa2', b'\xac']
+    _defstate_cmd = [b'\xa3', b'\xa4', b'\xad']
 
     _state_str = ['off', 'on']
 
