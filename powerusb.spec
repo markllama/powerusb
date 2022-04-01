@@ -1,6 +1,6 @@
 Summary: Control PowerUSB power strips
 Name: python-powerusb
-Version: 1.5
+Version: 2.0
 Release: 1
 Source0: %{name}-%{version}.tar.gz
 License: Apache License 2.0
@@ -10,8 +10,9 @@ Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Mark Lamourine <markllama@gmail.com>
 Url: http://github.com/markllama/powerusb
-Requires: python-lxml
-Requires: pyusb
+Requires: python3
+Requires: python3-lxml
+Requires: python3-hidapi
 
 %description
 
@@ -25,10 +26,10 @@ features TBD.
 %setup -n %{name}-%{version}
 
 %build
-python setup.py build
+python3 setup.py build
 
 %install
-python setup.py install -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+python3 setup.py install -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 mkdir -p $RPM_BUILD_ROOT/lib/udev/rules.d
 cp 99-powerusb.rules $RPM_BUILD_ROOT/lib/udev/rules.d
 
