@@ -25,7 +25,7 @@ package_python3-powerusb() {
 
 
   cd "$srcdir/powerusb-$pkgver"
-  python2 setup.py build
-  python2 setup.py install --prefix=/usr --root="$pkgdir"
+  python3 setup.py build
+  python3 setup.py install --prefix=/usr --root="$pkgdir"
 
 }
