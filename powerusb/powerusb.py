@@ -113,14 +113,8 @@ class PowerUSBStrip(object):
         return self._device
 
     @property
-    def busnum(self):
-        #return self._device.busnum
-        return 1
-
-    @property
-    def devnum(self):
-        #return self.hid_device.devnum
-        return 1
+    def path(self):
+        return self._path.decode('UTF-8')
 
     def open(self):
         self._device.open_path(self._path)
@@ -232,9 +226,8 @@ class PowerUSBStrip(object):
         return [PowerUSBStrip(**d) for d in hid_devices]
         
     def __str__(self):
-        return "%d:%d, %-9s, FWVer: %3s, Curr(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
-            self.busnum,
-            self.devnum,
+        return "%s %-9s, FWVer: %3s, Curr(mA) %5.1f, Power(KWh): %4.2f, %3s, %3s, %3s" % (
+            self.path,
             self.model, 
             self.firmware_version,
             self.current,
@@ -249,8 +242,7 @@ class PowerUSBStrip(object):
         strip = etree.Element("powerstrip")
         strip.set("model", str(self.model))
         strip.set("fw_version", str(self.firmware_version))
-        strip.set("busnum", str(self.busnum))
-        strip.set("devnum", str(self.devnum))
+        strip.set("path", self.path)
 
         current = etree.Element("current")
         current.text = str(self.current)

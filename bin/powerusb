@@ -28,19 +28,17 @@ import lxml.etree as etree
 from powerusb import PowerUSBStrip
 
 """
-pwrusb --list-strips
+powerusb --list-strips
 
-pwrusb <id> [on|off|reset|status|current|power|clear]
+powerusb <id> [on|off|reset|status|current|power|clear]
 
-pwrusb <id> [[--default] [(on|off)]]
+powerusb <id> [[--default] [(on|off)]]
 
 """
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Manage PowerUSB power strips")
-
-    parser.add_argument("--config-file", default="~/.powerusbrc")
 
     target = parser.add_mutually_exclusive_group()
 
@@ -59,33 +57,18 @@ def parse_arguments():
                         action="store_const", dest="format")
 
     parser.add_argument("--default", action="store_true")
-    parser.add_argument("socket", nargs="?")
-    parser.add_argument("action", nargs="?", choices=['status', 'on', 'off'])
+    parser.add_argument("--path", type=str, default=None)
+    parser.add_argument("socket", nargs="?", type=int, choices=range(1,4), metavar='socket',
+                        help='socket number: 1-3')
+    parser.add_argument("action", nargs="?", choices=['status', 'on', 'off'], metavar='action',
+                        help='status, on, off')
 
     return parser.parse_args()
 
-bus_re = re.compile("^(\d+):(\d+)(:(\d+))?$")
-
-def parse_socket(socket_string):
-    """Split a strip/socket ID string into components: bus, device, socket"""
-    m = bus_re.match(socket_string)
-    if m == None:
-        raise ValueError("invalid bus/socket string: %s" % socket_string)
-
-    busnum = int(m.group(1))
-    devnum = int(m.group(2))
-    socnum = m.group(4) and int(m.group(4))
-
-    if not socnum in (1, 2, 3):
-        raise ValueError("invalid socket number: %d" % socnum)
-
-    # return the bus and device number.  Socket number is optional
-    return (busnum, devnum, socnum)
-
-def find_strip(bus, device):
+def find_strip(path):
     """Return a power strip at the requiested bus and device"""
     for strip in PowerUSBStrip.strips():
-        if strip.busnum == bus and strip.devnum == device:
+        if not path or strip.path == path:
             return strip
 
     return None
@@ -94,9 +77,11 @@ def print_strip_status(format):
     """Find all power strips and print status from each one"""
 
     if format == "text":
-        for strip in PowerUSBStrip.strips():
+        strips = PowerUSBStrip.strips()
+        for snum in range(0, len(strips)):
+            strip = strips[snum]
             strip.open()
-            print(strip)
+            print("{}) {}".format(snum, strip))
             strip.close()
     elif format == "xml":
         estrips = etree.Element("powerstrips")
@@ -105,7 +90,7 @@ def print_strip_status(format):
             strip.open()
             estrips.append(strip.xml())
             strip.close()
-        print(etree.tostring(doc, pretty_print=True))
+        print(etree.tostring(doc, pretty_print=True).decode('UTF-8'))
     elif format == "json":
         print("JSON output not implemented")
     elif format == "syslog":
@@ -149,17 +134,16 @@ if __name__ == "__main__":
 
     elif opt.socket != None:
         # find the strip object
-        busnum, devnum, socnum = parse_socket(opt.socket)
-        strip = find_strip(busnum, devnum)
+        strip = find_strip(opt.path)
 
         if strip == None:
-            print("no such device: %s:%s" % (busnum, devnum))
+            print("no such device")
             exit(1)
 
-        if socnum == None:
+        if opt.socket == None:
             # strip action
             strip_command(strip, opt.action, opt.format)
 
         else:
             # socket action
-            socket_command(strip, socnum, opt.action, opt.format)
+            socket_command(strip, opt.socket, opt.action, opt.format)
