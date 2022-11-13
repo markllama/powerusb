@@ -1,7 +1,7 @@
 Summary: Control PowerUSB power strips
 Name: python-powerusb
 Version: 2.0
-Release: 1
+Release: 2
 Source0: %{name}-%{version}.tar.gz
 License: Apache License 2.0
 Group: Development/Libraries
@@ -11,8 +11,11 @@ BuildArch: noarch
 Vendor: Mark Lamourine <markllama@gmail.com>
 Url: http://github.com/markllama/powerusb
 Requires: python3
-Requires: python3-lxml
-Requires: python3-hidapi
+Requires: pythoni3-lxml
+Requires: libusb
+Requires: libhid
+Requires: hidapi
+Requires: hidapi-devel
 
 %description
 
