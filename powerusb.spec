@@ -16,6 +16,7 @@ Requires: libusb
 Requires: libhid
 Requires: hidapi
 Requires: hidapi-devel
+Requires: python-hidapi
 
 %description
 
