@@ -129,7 +129,7 @@ class PowerUSBStrip(object):
     def write(self, outstr):
         self._device.write(outstr + (b'\xff' * 63))
 
-   @property
+    @property
     def model(self):
         self.write(PowerUSBStrip._READ_MODEL)
 #        time.sleep(PowerUSBStrip._sleep_duration)
