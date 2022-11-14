@@ -103,7 +103,7 @@ class PowerUSBStrip(object):
         # ['
         for ivname in PowerUSBStrip._instance_variables:
             self.__dict__['_' + ivname] = kwargs[ivname] if ivname in kwargs else None
-        self._device = hid.Device(PowerUSBStrip._vendor_id, PowerUSBStrip._product_id)
+        self._device = hid.device(PowerUSBStrip._vendor_id, PowerUSBStrip._product_id)
         self.socket = [None]
         for socket_num in range(1,4):
             self.socket.append(PowerUSBSocket(self, socket_num))
