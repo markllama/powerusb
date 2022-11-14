@@ -103,7 +103,7 @@ class PowerUSBStrip(object):
         # ['
         for ivname in PowerUSBStrip._instance_variables:
             self.__dict__['_' + ivname] = kwargs[ivname] if ivname in kwargs else None
-        self._device = hid.device(self._path)
+        self._device = hid.Device(path=self._path)
         self.socket = [None]
         for socket_num in range(1,4):
             self.socket.append(PowerUSBSocket(self, socket_num))
@@ -129,7 +129,7 @@ class PowerUSBStrip(object):
     def write(self, outstr):
         self._device.write(outstr + (b'\xff' * 63))
 
-    @property
+   @property
     def model(self):
         self.write(PowerUSBStrip._READ_MODEL)
 #        time.sleep(PowerUSBStrip._sleep_duration)

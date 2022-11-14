@@ -1,1 +1,1 @@
-SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="003f", OWNER="root", GROUP="powerusb", MODE="0666" SYMLINK="powerusb%n" RUN="/bin/sh -c 'echo -n $(basename %p):1.0 > /sys/bus/usb/drivers/usbhid/unbind'"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="04d8", ATTRS{idProduct}=="003f", OWNER="root", GROUP="powerusb", MODE="0666" SYMLINK="powerusb%n" RUN="/bin/sh -c 'echo -n %p:1.0 > /sys/bus/usb/drivers/usbhid/unbind'"
